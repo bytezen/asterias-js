@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Asterias Viewer</title>
+    <style>
+        canvas {padding:0; margin: 0; height: 100%}
+/*        #sketch { background-color: greenyellow}*/
+        
+        #ui input {display: block; margin: 10px 0px; width: 100%;}
+    </style>
+    <link rel="stylesheet" href="../../lib/styles/w3.css">
+    
+    <!-- Vendors -->
+    <script src="../../node_modules/p5/lib/p5.min.js"></script>
+    <script src="../../node_modules/p5/lib/addons/p5.dom.js"></script>
+    <script src="../../node_modules/lodash/lodash.min.js"></script>
+    <script src="../../lib/redux.min.js"></script>
+    
+    <script src="../../src/scripts/modules/gene.js"></script>
+    <script src="../../src/scripts/modules/organism.js"></script>
+    <script src="../../src/scripts/modules/asterias.js"></script>    
+    
+    <!-- source -->
+    <script src="../../src/scripts/components/geneExpressionComponent.js"></script>    
+    <script src="../../src/scripts/components/asteriasExpressionComponent.js"></script>    
+    
+    <!-- my code -->
+    <script>
+        //this shoudl be val not expression level
+        var initState = {ring: genomeConfig.minring,
+                         size: genomeConfig.minsize 
+                        }
+        
+        function updateGeneExpression(gene,level) {
+            var obj = {};
+            obj[gene] = _.clamp(level,0,1.0);
+            return _.assign({},initState, obj);    
+        }
+        
+        var testReducer = function(state,action) {
+            switch(action.type) {
+                case 'expressionChange':
+                    return updateGeneExpression(action.gene,action.level);             
+                    break;
+                default: 
+                    return initState;
+                    
+            }
+        }
+        
+        //setup the redux stuff
+        var store = Redux.createStore(testReducer);
+        var getState = store.getState,
+            dispatch = store.dispatch;
+        
+        
+        
+        var geneticCode = [
+            {name:'ring', level: 0.2},
+            {name:'point',level: 0.3},
+            {name:'size', level: 0.4},
+            {name:'pointiness', level: 0.5},
+            {name:'brightness', level: 0.6},
+            {name:'twisty', level: 1.0},
+            {name:'color', level: 0.1},
+            {name:'shadow', level: 0.0},
+        ];
+
+        var asterias = createAsterias(geneticCode);
+        var ringgene = asterias.getGene('ring')
+        var pointgene = asterias.getGene('point')
+        var sizegene = asterias.getGene('size')
+        var pointinessgene = asterias.getGene('pointiness')
+        var brightnessgene = asterias.getGene('brightness')
+        var twistygene = asterias.getGene('twisty')
+        var colorgene = asterias.getGene('color')
+        var shadowgene = asterias.getGene('shadow')
+        //cb
+        //data.value
+        //data.name
+        function onChange(data) {
+            console.log('got call... '); 
+            console.log(data);
+        }
+
+        
+        var component = asteriasComponent(asterias);
+        component.setProp('id', 'testGene')
+        component.setProp('changeHandler',onChange);
+        component.setProp('parent','ui')
+        component.addChild(ringgene);
+        component.addChild(pointgene);
+        component.addChild(pointinessgene);
+        component.addChild(sizegene);
+        component.addChild(brightnessgene);
+        component.addChild(twistygene);
+        component.addChild(colorgene);
+        component.addChild(shadowgene);
+        
+        
+        function setup() {
+            component.initialize();
+            
+            var canvas = createCanvas(400,400);
+            canvas.parent('sketch')
+            background(50)
+        }
+        
+        function draw() {
+            component.render();
+        }
+    </script>
+    
+</head>
+<body class="w3-container">
+    <div class="w3-section w3-border w3-row-padding w3-grey" style="position:relative; height: 400px; width: 800px; display: flex">
+        <section id="ui" class="w3-half w3-red" style="flex: 1">  
+        </section>
+        <section id="sketch" class="w3-half" style="flex: 1">
+        </section>
+    </div>
+    <script>
+
+    </script>
+</body>
+</html>

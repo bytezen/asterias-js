@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Asterias Viewer</title>
+    <style>
+        canvas {padding:0; margins: 0; height: 100%}
+        #sketch { background-color: greenyellow}
+    </style>
+    <link rel="stylesheet" href="../lib/styles/w3.css">
+    
+    <!-- Vendors -->
+    <script src="../node_modules/p5/lib/p5.min.js"></script>
+    <script src="../node_modules/p5/lib/addons/p5.dom.js"></script>
+    <script src="../node_modules/lodash/lodash.min.js"></script>
+    <script src="../lib/redux.min.js"></script>
+    
+    <!-- my code -->
+    <script src="../src/scripts/modules/gene.js"></script>
+    <script src="../src/scripts/modules/organism.js"></script>
+    <script src="../src/scripts/modules/asterias.js"></script>    
+    
+    <!-- source -->
+<!--    <script src="../src/scripts/components/geneExpressionComponent.js"></script>    -->
+    <script src="../src/scripts/asteriasView.js"></script>    
+    
+</head>
+<body class="w3-container">
+    <div class="w3-section w3-row-padding" style="display: flex">
+        <section id="ui" class="w3-half w3-red" style="flex: 1">  
+        </section>
+        <section id="sketch" class="w3-half" style="flex: 1">
+        </section>
+    </div>
+    <script>
+        var asterias = createAsterias([]);
+    </script>
+</body>
+</html>

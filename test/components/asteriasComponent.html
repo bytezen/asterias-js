@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Asterias Viewer</title>
+    <style>
+        #sketch, canvas {padding:0; margin: 0; height: 100%}
+        canvas { display: block; position: relative}
+/*        #sketch { background-color: greenyellow}*/
+        
+        
+    </style>
+    <link rel="stylesheet" href="../../lib/styles/w3.css">
+    
+    <!-- Vendors -->
+    <script src="../../lib/expect.min.js"></script>
+    
+    
+    <!-- Vendors -->
+    <script src="../../node_modules/p5/lib/p5.min.js"></script>
+    <script src="../../node_modules/p5/lib/addons/p5.dom.js"></script>
+    <script src="../../node_modules/lodash/lodash.min.js"></script>
+    
+    <!-- App code -->
+    <script src="../../src/scripts/modules/gene.js"></script>
+    <script src="../../src/scripts/modules/organism.js"></script>
+    <script src="../../src/scripts/modules/asterias.js"></script>  
+    
+    <script src="../../lib/redux.min.js"></script>
+    <script src="../../src/scripts/store/storeObserver.js"></script>
+    <script src="../../src/scripts/actions/actions.js"></script>
+    <script src="../../src/scripts/reducer/populationReducer.js"></script>
+    
+  
+    
+    <!-- source -->    
+    <script src="../../src/scripts/components/asteriasComponent.js"></script>    
+    
+    <!-- my code -->
+    <script>
+        //this shoudl be val not expression level
+        var initState = {
+                            position: [0,0],
+                            ring: genomeConfig.minring,
+                            size: genomeConfig.minsize 
+                        }
+        
+        function updateGeneExpression(gene,level) {
+            var obj = {};
+            obj[gene] = _.clamp(level,0,1.0);
+            return _.assign({},initState, obj);    
+        }
+
+        //Test action creators
+        function ringExpressionChangeAction(level) {
+            return {type:'expressionChange', gene: 'ring', level:level};
+        }
+        
+        function badAction(level) {
+            return {type:'uknown', gene: 'ring', level:level};
+        }
+        
+        
+        //setup the redux stuff
+        var R = Redux.combineReducers({population: populationReducer})
+    
+        var store = Redux.createStore(R);
+        var getState = store.getState,
+            dispatch = function(action) {
+                        console.log("{dispatching: " + action.type  +"}");
+                console.log("\t...action")
+                console.log(action);
+                        store.dispatch(action);
+                    }
+       
+        /* String rendering test
+        
+        var myAsterias = asteriasComponent({id:'test1'})
+        myAsterias.render()
+        myAsterias = asteriasComponent({id:'test1'},
+                                       {ring:1, 
+                                        point:2,
+                                        size:3,
+                                        pointiness:4,
+                                        brightness:5,
+                                        twisty:6,
+                                        color:7,
+                                        shadow:8            
+                                        });
+        myAsterias.render()
+        myAsterias.setState({pointiness: 100})
+        myAsterias.render()
+        */
+        
+        var myAsterias = asteriasComponent({id:'test1'},
+                                          {size: 200,
+                                          point: 5,
+                                          pointiness: .5,
+                                          ring: 9,
+                                          shadow: 50,
+                                          brightness: 100,
+                                          nucleus: .25,
+                                          twisty: 15,
+                                          coil: 0,
+                                          color: 0})
+        
+        var foo = 20;
+        
+        function setup() {
+            var canvas = createCanvas(400,400);
+            colorMode(HSB);
+            canvas.parent('sketch')
+            background(50);
+            
+            myAsterias.render();
+            rot = radians(360 / foo);
+            outerOffset = radians(-90),
+            innerOffset = outerOffset + rot * .5; 
+            noLoop();
+        }
+        
+        var outerOffset, innerOffset;// = radians(-90);
+        var radius = 100, innerRadius = radius * .3;
+        var x,y, i = 0;
+        var rot;
+        
+        
+        function draw() {
+            background(0); 
+            translate(200,200);
+            myAsterias.render();
+//            beginShape()
+//            _.each(_.range(foo), function(i){
+//                vertex(radius * cos(outerOffset + rot * i),
+//                       radius * sin(outerOffset + rot * i));                     
+//                vertex(innerRadius * cos(innerOffset + rot * i),
+//                       innerRadius * sin(innerOffset + rot * i));                     
+//                
+//            })
+//            endShape()
+        }
+    </script>
+    
+</head>
+<body class="w3-container">
+    <div class="w3-section w3-border w3-row-padding w3-grey" style="position:relative; display: flex">
+        <section id="sketch" class="w3-section" style="flex: 1">
+        </section>
+    </div>
+    <script>
+
+    </script>
+</body>
+</html>
