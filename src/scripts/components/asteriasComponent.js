@@ -4,10 +4,10 @@ var asteriasComponent = function(props,opt){
                          point:4,
                          size:100,
                          nucleus: .40,
-                         pointiness:0.5,
+                         pointiness:0.05,
                          brightness:230,
                          twisty:0,
-                         coil: 0.5,
+                         coil: 0.0,
                          color:0,
                          shadow:20            
                         },
@@ -39,9 +39,11 @@ var asteriasComponent = function(props,opt){
     
     function setState(newState) {
         state = Object.assign({},state,newState);
+        
+        //make sure state is safe by setting the baseline for values
         state.point = Math.max(3,state.point);
         state.ring = Math.max(1, state.ring)
-        //make sure state is safe
+        state.pointiness = Math.max(.01, state.pointiness);
         
         
         _privState = Object.assign({},_privState,state);

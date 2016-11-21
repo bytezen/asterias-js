@@ -56,16 +56,19 @@ var populationReducer = (function(){
     var reducer = function(state,action) {
         var nextState;
         state = _.isNil(state) ? initState : state 
-        console.log('calling reducer.. with state and action')
-        console.log(state)
-        console.log(action)
-        console.log(nextState);
+        
+        console.log('calling population reducer.. with: {' + action.type +'}')
+//        console.log(state)
+//        console.log(action)
+//        console.log(nextState);
         
         switch(action.type) {
-            case 'create':
-                var id = action.payload.id;
-                var org = {};
-                org[id] = createOrganism();
+            case 'createOrganism':
+                console.log('\t...create organism')
+                
+                var id = action.payload.name;
+                var org = {};                
+                org[action.payload.name] = _.pick(action.payload, _.keys(genome));
 
                 var nextById = update(state.byId, org);
                 var nextAllIds = state.allIds.concat(id);
@@ -75,6 +78,12 @@ var populationReducer = (function(){
                 
                 expect(state.allIds).toNotEqual(nextState.allIds);
                 break;
+            case 'expressionChange':
+                var oldExpression = state.byId[action.payload.id];
+                
+//                var newExpression = update(oldExpression,{})
+//                nextById = update(state.byId,{})
+                nextState = state;
             default:
                 nextState = state;
         }

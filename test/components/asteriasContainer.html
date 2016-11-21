@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Asterias Viewer</title>
+    <style>
+        #sketch, canvas {padding:0; margin: 0; height: 100%}
+        canvas { display: block; position: relative}
+/*        #sketch { background-color: greenyellow}*/
+        
+        
+    </style>
+    <link rel="stylesheet" href="../../lib/styles/w3.css">
+    
+    <!-- Vendors -->
+    <script src="../../lib/expect.min.js"></script>
+    
+    
+    <!-- Vendors -->
+    <script src="../../node_modules/p5/lib/p5.min.js"></script>
+    <script src="../../node_modules/p5/lib/addons/p5.dom.js"></script>
+    <script src="../../node_modules/lodash/lodash.min.js"></script>
+    
+    <!-- App code -->
+    <script src="../../src/scripts/modules/gene.js"></script>
+    <script src="../../src/scripts/modules/organism.js"></script>
+    <script src="../../src/scripts/modules/asterias.js"></script>  
+    
+    <script src="../../lib/redux.min.js"></script>
+    <script src="../../src/scripts/store/storeObserver.js"></script>
+    <script src="../../src/scripts/actions/actions.js"></script>
+    
+    <script src="../../src/scripts/reducer/geneticCode.js"></script>
+    <script src="../../src/scripts/reducer/populationReducer.js"></script>
+    <script src="../../src/scripts/reducer/geneticCode.js"></script>
+    
+    <!-- source -->    
+    <script src="../../src/scripts/components/asteriasComponent.js"></script>    
+    <script src="../../src/scripts/components/asteriasContainer.js"></script>    
+    
+    <!-- my code -->
+    <script>
+        //this shoudl be val not expression level
+
+        //Test action creators
+        function setGeneticCode(gene,min,max) {
+            return {type:"setGeneExpressionRange", 
+                    payload:{gene:gene, min:min, max:max}};
+        }
+                
+        //setup the redux stuff
+        var R = Redux.combineReducers({population: populationReducer, dna: geneticCodeReducer})
+    
+        var store = Redux.createStore(R);
+        var getState = store.getState,
+            dispatch = function(action) {
+                            console.log("{dispatching: " + action.type  +"}");
+                            console.log(action);
+                            store.dispatch(action);
+                        }
+       
+        // create an organism
+        dispatch(asteriasBirth({name:'test'}));
+        
+        
+        //create a component for the organism
+        var asterias = asteriasComponent({id:'test'});
+        var myAsterias = asteriasContainer(store,asterias);
+        
+        
+        function setup() {
+            var canvas = createCanvas(400,400);
+            colorMode(HSB);
+            canvas.parent('sketch')
+            background(0);
+            translate(200,200);
+            myAsterias.render();
+            noLoop();
+        }
+        
+//        
+//        function draw() {
+//            background(0); 
+//            translate(200,200);
+//            myAsterias.render();
+//        }
+    </script>
+    
+</head>
+<body class="w3-container">
+    <div class="w3-section w3-border w3-row-padding w3-grey" style="position:relative; display: flex">
+        <section id="sketch" class="w3-section" style="flex: 1">
+        </section>
+    </div>
+    <script>
+
+    </script>
+</body>
+</html>
