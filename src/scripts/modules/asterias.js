@@ -1,18 +1,157 @@
+var asteriasAPI = (function(){
+function lerp(a,b,t) {
+    return (1-t)*a + b*t;
+}
+    
+    
+    var defaultexpr = {
+        ring: 0.0,
+        point: 0.0,
+        size: 0.4,
+        pointiness: 0.5,
+        brightness: 0.0,
+        twisty: 0.0,
+        color: 0.0,
+        shadow: 0.0,
+        nucleus: 1.0,
+        coil: 0.5
+    }
+    
+    var genomeConfig = { "ring" :[3,21],
+            "point": [3,20],
+            "size": [50,200],
+            "pointiness": [0.01,1.0],
+            "brightness": [100,250],
+            "twisty": [0,100],
+            "color": [0,360],
+            "shadow": [30,80],
+            "nucleus": [.10,.50],
+            "coil": [-1.0,1.0],
+        }    
+    
+    //define the gene order
+    var _chromosome = [
+        'ring',
+        'point',
+        'size',
+        'pointiness',
+        'brightness',
+        'twisty',
+        'color',
+        'shadow',
+        'nucleus',
+        'coil'
+    ]
+    
+    function getExpressionValue(gene,level) {
+        var expression = _.get(genomeConfig,gene,[0,0])
+        return lerp( expression[0], expression[1], level);
+    }    
+     
+    
+    function chromosomeValues(arr) {
+        return _.map(arr,
+                     function(o) {
+                       return _.mapValues(o,'value')
+                    });
+    }
+
+    function chromosomeLevels(arr) {
+        return _.map(arr,
+                     function(o) {
+                       return _.mapValues(o,'level')
+                    });
+
+    }    
+    
+    function _create(name,opt){
+        var geneLevels = Object.assign(defaultexpr,opt);
+
+        function dna() {
+            return _.map(_chromosome,
+                         function(geneName){
+                            var obj = {};
+                            obj[geneName] = getExpressionValue(geneName,geneLevels[geneName]);
+                            return obj;
+            })
+        }
+        
+        function expressionLevel(name,level) {
+            if(!_.isNil(level)) {
+                geneLevels[name] = level;  
+                _updateGeneProperties();
+            } 
+        }
+        
+
+        function chromosome() {
+            return _.map(_chromosome,
+                        function(geneName){
+                            var obj = {}
+                            obj[geneName] = Object.assign({},ret[geneName])
+                            return obj;
+            })
+        }
+        
+        
+        function _updateGeneProperties() {
+            _.each(_chromosome,
+                  function(geneName){
+                    ret[geneName].level = geneLevels[geneName];
+                    ret[geneName].value = getExpressionValue(geneName, geneLevels[geneName])
+                    
+            })
+            ret.chromosome = chromosome();
+        }
+                
+
+        var ret = {
+                name: name || "_asterias",
+                expression: expressionLevel,
+                chromosome: []
+               };
+        
+        //initialize gene properties
+        _.each(_chromosome,
+              function(geneName){
+                ret[geneName] = {};
+        })
+        _updateGeneProperties()
+        
+        //create a property for each gene as a shortcut to access the 
+        // value and level
+        
+        return ret;
+    }
+    
+    return {
+        newAsterias: _create,
+        getExpressionValue: getExpressionValue,
+        defaultExpression: defaultexpr,
+        genomeConfig: genomeConfig,
+        chromosome: _chromosome,
+        chromosomeValues: chromosomeValues,
+        chromosomeLevels: chromosomeLevels        
+        }
+    }());
+
+//OLD DEPRECATED CODE
+/*
 var DNAdefault = {};
 
 var genome = {ring:'ring', point:'point', size:'size', pointiness:'pointiness', brightness:'brightness', twisty:'twisty', color:'color', shadow:'shadow', nucleus: 'nucleus', coil:'coil'}
 
-//var genomeConfig = {minring: 3, maxring: 21,
-//                    minpoint: 5, maxpoint: 15,
-//                    minsize:100, maxsize: 250,
-//                    minpointiness: 0.3, maxpointiness: 0.95,
-//                    minbrightness: 20, maxbrightness: 200,
-//                    mintwisty: 45, maxtwisty: 100,
-//                    mincolor: 120, maxcolor: 120,
-//                    minshadow: 50 , maxshadow: 50,
-//                    minnucleus: .10, maxnucleus: .40,
-//                    mincoil: -1.0, maxcoil: 1.0                    
-//                   }
+var initState = { "ring" :[3,21],
+            "point": [3,20],
+            "size": [50,200],
+            "pointiness": [0.01,1.0],
+            "brightness": [100,250],
+            "twisty": [0,100],
+            "color": [0,360],
+            "shadow": [30,80],
+            "nucleus": [.10,.50],
+            "coil": [-1.0,1.0],
+        }
 
 var defaultexpr = {
     ring: 0.0,
@@ -27,7 +166,19 @@ var defaultexpr = {
     coil: 0.5
 }
 
-
+//define the gene order
+var chromosome = [
+    'ring',
+    'point',
+    'size',
+    'pointiness',
+    'brightness',
+    'twisty',
+    'color',
+    'shadow',
+    'nucleus',
+    'coil'
+]
 
 
 function getExpressionValue(gene,level) {
@@ -50,21 +201,20 @@ function _initializeGenome(geneticCode) {
     
     return res;
 }
-
+*/
 /*
 an array of objects --> gene names and level
 */
 
+/*
 function createAsterias(geneticCode) {
     geneticCode = _initializeGenome(geneticCode)    
-//    console.log(_.values(geneticCode))
     var asterias = createLife(_.values(geneticCode));
  
     //given a name return a configured gene based on the 
     //organisms current expression level for that gene
     asterias.getGene = function getGene(name) {
         if(_.has(asterias, name)) {
-//            var value = asterias[name];
             var level = asterias[name+'Level'];
             //get the min and max from the genetic Config based on the name
             var min = genomeConfig['min'+name]
@@ -78,3 +228,6 @@ function createAsterias(geneticCode) {
     
     return asterias;
 }
+*/    
+    
+

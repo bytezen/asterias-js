@@ -2,90 +2,94 @@
 describe('Asterias', function() {
     var gene;
     
+    var genomeConfig = asteriasAPI.genomeConfig
+         
+    
     beforeEach(function(){
         
     });
     
     describe('defaults', function(){
         it('has a ring gene', function(){
-                var asterias = createAsterias(),
+                var asterias = asteriasAPI.newAsterias();// createAsterias(),
                     geneName = 'ring',
-                    min = genomeConfig['min'+geneName],
-                    max = genomeConfig['max'+geneName];
+                    min = genomeConfig.ring[0],
+                    max = genomeConfig.ring[1]
 
-                expect(asterias[geneName]).toBe.ok;
-                expect(asterias[geneName]).toBe(min);        
+                expect(asterias.ring).toBe.ok;
+                expect(asterias.ring.value).toBe(min);        
             });
 
-            it('has a point gene', function(){
-                var asterias = createAsterias(),
-                    geneName = 'point';
-                    min = genomeConfig['min'+geneName],
-                    max = genomeConfig['max'+geneName];
+        it('has a point gene', function(){
+            var asterias = asteriasAPI.newAsterias(),
+                geneName = 'point';
+                min = genomeConfig.point[0],
+                max = genomeConfig.point[1];
 
-                expect(asterias[geneName]).toBe.ok;
-                expect(asterias[geneName]).toBe(min);      
-            });
+            expect(asterias.point).toBe.ok;
+            expect(asterias.point.value).toBe(min);      
+        });
 
-            it('has a size gene', function(){
-                var asterias = createAsterias(),
-                    geneName = 'size';
-                    min = genomeConfig['min'+geneName],
-                    max = genomeConfig['max'+geneName];
+        it('has a size gene', function(){
+            var asterias = asteriasAPI.newAsterias(),
+                geneName = 'size';
+                min = genomeConfig.size[0],
+                max = genomeConfig.size[1];
 
-                expect(asterias[geneName]).toBe.ok;
-                expect(asterias[geneName]).toBe(min);        
-            });
+            expect(asterias.size).toBe.ok;
+            expect(asterias.size.value).toBe(min);        
+        });
 
-            it('has a pointiness gene', function(){
-                var asterias = createAsterias(),
-                    geneName = 'pointiness';
-                    min = genomeConfig['min'+geneName],
-                    max = genomeConfig['max'+geneName];
+        it('has a pointiness gene', function(){
+            var asterias = asteriasAPI.newAsterias(),
+                geneName = 'pointiness';
+                min = genomeConfig.pointiness[0],
+                max = genomeConfig.pointiness[1];
 
-                expect(asterias[geneName]).toBe.ok;
-                expect(asterias[geneName]).toBe(min);  
-            });
+            expect(asterias[geneName]).toBe.ok;
+            expect(asterias[geneName].value).toBe(min);  
+        });
 
-            it('has a brightness gene', function(){
-                var asterias = createAsterias(),
-                    geneName = 'brightness';
-                    min = genomeConfig['min'+geneName],
-                    max = genomeConfig['max'+geneName];
+        it('has a brightness gene', function(){
+            var asterias = asteriasAPI.newAsterias(),
+                geneName = 'brightness';
+                min = genomeConfig.brightness[0],
+                max = genomeConfig.brightness[1];
 
-                expect(asterias[geneName]).toBe.ok;
-                expect(asterias[geneName]).toBe(min); 
-            });
+            expect(asterias[geneName]).toBe.ok;
+            expect(asterias[geneName].value).toBe(min); 
+        });
 
-            it('has a twisty gene', function(){
-                var asterias = createAsterias(),
-                    geneName = 'twisty';
-                    min = genomeConfig['min'+geneName],
-                    max = genomeConfig['max'+geneName];
+        it('has a twisty gene', function(){
+            var asterias = asteriasAPI.newAsterias(),
+                geneName = 'twisty';
+                min = genomeConfig.twisty[0],
+                max = genomeConfig.twisty[1];
 
-                expect(asterias[geneName]).toBe.ok;
-                expect(asterias[geneName]).toBe(min);      
-            });
+            expect(asterias[geneName]).toBe.ok;
+            expect(asterias[geneName].value).toBe(min);      
+        });
 
-            it('has a color gene', function(){
-                var asterias = createAsterias(),
-                    geneName = 'color';
-                    min = genomeConfig['min'+geneName],
-                    max = genomeConfig['max'+geneName];
+        it('has a color gene', function(){
+            var asterias = asteriasAPI.newAsterias(),
+                geneName = 'color';
+                min = genomeConfig.color[0],
+                max = genomeConfig.color[1];
 
-                expect(asterias[geneName]).toBe.ok;
-                expect(asterias[geneName]).toBe(min);      
-            })
+            expect(asterias[geneName]).toBe.ok;
+            expect(asterias[geneName].value).toBe(min);      
+        })
 
-            it('has a shadow gene', function(){
-                var asterias = createAsterias(),
-                    geneName = 'shadow';
-                    min = genomeConfig['min'+geneName],
-                    max = genomeConfig['max'+geneName];
+        it('has a shadow gene', function(){
+            var asterias = asteriasAPI.newAsterias(),
+                geneName = 'shadow';
+                min = genomeConfig.shadow[0],
+                max = genomeConfig.shadow[1];
 
-                expect(asterias[geneName]).toBe.ok;
-                expect(asterias[geneName]).toBe(min);
-            });    
+            expect(asterias[geneName]).toBe.ok;
+            expect(asterias[geneName].value).toBe(min);
+        });    
+
 
     })
     
