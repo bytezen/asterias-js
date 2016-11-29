@@ -1,22 +1,74 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Mocha Tests</title>
-    <link rel="stylesheet" href="node_modules/mocha/mocha.css">
+    <title>Asterias App</title>
+    <link rel="stylesheet" href="./lib/styles/w3.css">
+    
+    <!-- Vendors -->
+    <script src="node_modules/p5/lib/p5.min.js"></script>
+    <script src="node_modules/p5/lib/addons/p5.dom.js"></script>    
+    <script src="node_modules/lodash/lodash.min.js"></script>
+    <script src="lib/redux.min.js"></script>
+
+    <!-- assertions -->    
+    <script src="lib/expect.min.js"></script>
+    
+    <!-- my utils -->
+    <script src="./src/scripts/modules/util.js"></script>
+    
+    <!-- asterias modules -->
+    <script src="./src/scripts/modules/gene.js"></script>
+    <script src="./src/scripts/modules/organism.js"></script>
+    <script src="./src/scripts/modules/asterias.js"></script>      
+    <script src="./src/scripts/modules/fitness.js"></script>      
+    <script src="./src/scripts/modules/geneticAlgorithm.js"></script>      
+    
+    <!-- asterias ducks -->
+    <script src="./src/scripts/ducks/simulation.js"></script>      
+    
+    <!-- UI modules -->
+    <script src="./src/scripts/modules/ui/grid.js"></script>
+    
+    <!-- asterias components -->
+    <script src="./src/scripts/components/asteiasGrid.js"></script>
+    <style>
+        #sketch { position:relative; width: 600px; height: 500px;}
+    </style>
   </head>
-  <body>
-   
-    <div id="mocha"></div>
-    <script src="node_modules/mocha/mocha.js"></script>
-    <script src="node_modules/expect.js/index.js"></script>
-    <script>mocha.setup('bdd')</script>
-
-    <!-- load code you want to test here -->
-    <script src="test/geneTest.js"></script>
-    <!-- load your test files here -->
-
+  <body class="w3-container">
+    <main class="w3-section w3-grey" style="position:relative">
+       
+        <div id="sketch" class="w3-green">
+          
+        </div>
+    </main>
+    
+    <script src="src/scripts/app/app.js"></script>
+    
     <script>
-     mocha.run()     
+        var canvas
+        var comp = ellipseComponent()
+        
+        var grid = asteriasGrid({children: _.times(5, ellipseComponent),
+                                 rows: 3,
+                                 cols: 3,
+                                 width: 600,
+                                 height: 500,
+                                 center: true
+                                })
+        
+        function setup(){
+            canvas = createCanvas(600,500);
+            canvas.parent("sketch")
+            background(200);
+            grid.render();
+        }
+        
+//        function draw(){
+//            background(200)
+//            fill('yellow')
+//            rect(100,100,50,50);
+//        }
     </script>
   </body>
 </html>

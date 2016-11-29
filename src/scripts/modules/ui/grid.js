@@ -24,7 +24,7 @@ var gridAPI = function makeGrid(config) {
     
 //    console.log(opt);
     
-    //create coordinates rowMajor
+    //create coordinates column Major
     var colpts = _.times(opt.cols,
                         function(j){
                             return bytezenAPI.map(j,0,colitercount,colrange[0],colrange[1]);
@@ -44,12 +44,20 @@ var gridAPI = function makeGrid(config) {
         console.log(colitercount, colrange)
         console.log(colpts)
     }
-//    console.log(rowpts);
+
+    //returns the right combination of coordinates, but col major form
+    var origins = bytezenAPI.product(colpts,rowpts);
+    
+    //convert from colMajor to rowMajor
+    origins = _.flatten(_.zip.apply(null,
+                                    _.chunk(origins, opt.rows)
+                                   )
+                       )
     
     
     return {
         cellSize: [cellwidth,cellheight],
-        origins: bytezenAPI.product(colpts,rowpts),
+        origins: origins,
         ar: cellwidth / cellheight
     }
 }
