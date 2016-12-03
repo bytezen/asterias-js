@@ -18,8 +18,13 @@ var fitnessAPI = (function(){
         return _ordinal16[ind];
     }
     
+    function equal() {
+        return 1;    
+    }
+    
     return {
         ordinalModel: ordinalRankFitness,
-        ordinal16: _ordinal16
+        ordinal16: _ordinal16,
+        equal: equal
     }
 }())

@@ -3,9 +3,49 @@
 
 var simulation = (function(){
     //export const types = {
+
+//    var GA, population, matingPool;
+//
+//    before(function(){
+//        population = _.map(_.range(16),
+//                          function(i) {
+//                            return asteriasAPI.newAsterias('a_'+i);
+//                        })        
+//    })
     
-    function runSimulation(state,fitFn) {
         
+//        matingPool = GA.population(population,fitness)
+    
+    
+    function runSimulation(state) {
+        var GA = geneticAlgorithmAPI(state.fitness,0,true); //debug is last param
+        var nextPool = {},
+            nextParentPool = {},
+            parents,
+            progenyName
+        //1. generate mating pool
+        //fitness return the counts of an organism
+        var matingpool = GA.population(state.poolById,state.fitness)
+        
+        _.times(state.populationSize,
+                function() {
+                    parents = GA.parents(matingpool)
+                    kidgenes = GA.progeny(parents[0],parents[1], 0.5);
+                    progenyName = parents[0].name+'_'+parents[1].name
+                    nextPool[progenyName] = 
+                        asteriasAPI.newAsterias(progenyName, kidgenes)
+                    nextParentPool[progenyName] = {mom: parents[0], dad:parents[1]}
+                })
+
+        return {nextPool: nextPool, nextParentPool:nextParentPool};
+        // for the number of progeny needed:
+        //          GA.parents
+        //          GA.progeny
+        //          createAsterias from progeny
+        //          poolId
+        //          add new population
+        
+            
     }
     
     function update(state, newstate) {
@@ -13,6 +53,8 @@ var simulation = (function(){
     }
     
     function addToPopulation(pool,org) {
+        console.log(pool)
+        console.log(org)
         var newOrganism = {},
             newPool = {};
 
@@ -22,25 +64,44 @@ var simulation = (function(){
         return newPool
     }
     
-    function addId(arr,name) {
-        return arr.concat(name);
+    function addIds(arr,id) {
+        return arr.concat(id);
+    }
+    
+    function randomId() {
+        var stem = (Math.random() * Math.random()).toFixed(5)
+        return 'ast_'+stem
+    }
+    
+    function randomAsterias() {        
+        var ret = asteriasAPI.newAsterias(randomId())
+        
+        _.each(ret.chromosome,
+               function(g){ 
+                    var gene = _.keys(g)[0]
+                    ret.expression(gene,Math.random())
+                }); 
+        return ret;
     }
     
     var types = {
             ADD_TO_POPULATION: "SIMULATION/ADD_TO_POPULATION",
             ADD_GROUP_TO_POPULATION: "SIMULATION/ADD_GROUP_TO_POPULATION",
-        SETUP: '',
-        RUN: 'SIMULATION/RUN',
-        ADD_FITNESS_MODEL:'',
-            RESET:             "SIMULATION/RESET"
+            SETUP: '',
+            RUN: 'SIMULATION/RUN',
+            ADD_FITNESS_MODEL:'',
+            RESET: "SIMULATION/RESET",
+            GENERATE_POPULATION: "SIMULATION/GENERATE_POPULATION",
+            SIM_SIZE: "SIMULATION/SET_POPULATION_SIZE"
         },
         initialState = {
             mutationRate: 0,
             populationSize: 20,
             poolById: {},
-            allIds: [],
+            parentsById: {},
+            allIds: [], // only poolIds
             generations: 0,
-            fitness: fitnessAPI.ordinalModel
+            fitness: fitnessAPI.equal
         }
     
     return {
@@ -57,7 +118,7 @@ var simulation = (function(){
                     case types.ADD_TO_POPULATION:
                         var newPool = addToPopulation(state.poolById,action.payload.organism);
                         var nextState = update(state, newPool)        
-                        nextState.allIds = addId(nextState.allIds, action.payload.organism.name)    
+                        nextState.allIds = addIds(nextState.allIds, action.payload.organism.name)    
 //                        var newOrganism = {},
 //                            newPool = {};
 //
@@ -70,7 +131,9 @@ var simulation = (function(){
                         
                     case types.ADD_GROUP_TO_POPULATION:                        
                         var newPool = {poolById: update({},state.poolById)};
-                        newPool.poolById = _.reduce(action.payload.organisms,
+                        newPool.poolById =
+                            _.reduce(_.take(action.payload.organisms,
+                                            state.simulationSize),
                                               function(res,asterias){
                                                 var obj = {};
                                                 obj[asterias.name] = asterias
@@ -80,8 +143,45 @@ var simulation = (function(){
                         nextState = update(state,newPool)
                         return nextState;
                         
+                    case types.GENERATE_POPULATION:
+                        var randomPop = _.map(_.range(state.populationSize),
+                                              randomAsterias)
+//                        console.log(randomPop)
+                        var nextPool = {poolById: update({},state.poolById)};
+                        nextPool.poolById = _.reduce(randomPop,
+                                              function(res,asterias){
+                                                var obj = {};
+                                                obj[asterias.name] = asterias
+                                                return update(res,obj);
+                                              },
+                                              nextPool.poolById)
+//                        console.log(nextPool);
+                        nextState = update(state,nextPool)                        
+                        
+                        nextState.allIds = addIds(nextState.allIds,_.keys(nextState.poolById))                        
+                        
+//                        FOR SINGLE ORG                        
+//                        var newOrg = randomAsterias()
+//                        var newPool = addToPopulation(state.poolById,newOrg);
+//                        var nextState = update(state, newPool)        
+//                        nextState.allIds = addId(nextState.allIds, newOrg.name)    
+                        return nextState;
+                    
+                    case types.RUN:
+                        var simResults = runSimulation(state)
+                        var nextPool = {poolById: simResults.nextPool}
+                        nextState = update(state,nextPool)
+                        nextState.allIds = _.keys(nextState.poolById);
+                        nextState.parentsById = simResults.nextParentPool;
+                        
+                        return nextState;
+                        
                     case types.RESET:
-                        return initialState;
+                        var nextState = initialState                        
+                        return update(nextState,action.payload);
+                    
+                    case types.SIM_SIZE:                        
+                        return update(state,{populationSize: action.payload});
                         
                     default:
                         return state;
@@ -99,7 +199,20 @@ var simulation = (function(){
                             return {type: types.ADD_GROUP_TO_POPULATION, payload: {organisms: arr}}
                         },
             
-            resetSim: function() { return {type:types.RESET}}
+            generatePopulation: function() {
+                            return {type: types.GENERATE_POPULATION}
+                        },
+            
+            runSimulation: function() { return {type:types.RUN} },
+            
+            simulationSize: function(num) { return {type:types.SIM_SIZE, 
+                                                    payload: num}},
+            
+            resetSim: function(opt) { return {type:types.RESET, payload:opt}}
+        },
+        
+        utils: {
+            randomAsterias: randomAsterias
         }
         
     }

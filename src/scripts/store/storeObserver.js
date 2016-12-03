@@ -23,6 +23,8 @@ function observeStore(store, select, onChange) {
 */
 
 //ES5
+//Select extracts the state subtree that you are interested in
+//onChange is what you want to run if it changes
 function observeStore(store, select, onChange) {
   var currentState;
 

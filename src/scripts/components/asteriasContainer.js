@@ -1,6 +1,6 @@
 var asteriasContainer = function(store, asteriasComponent){
     var defaultProps = {component: undefined, store: undefined},
-        defaultState = { component: undefined }
+        defaultState = { component: undefined, id: undefined }
     
     function radians(deg) { return ( 3.14159 * deg / 180 ); }
     function normalize(val,min,max) { 
@@ -69,13 +69,17 @@ var asteriasContainer = function(store, asteriasComponent){
     }    
     
     function storeChange(nextState) {
-        console.log("...store change in asteriasContainer...")
+        console.log("...store change in asteriasContainer...get our component")
+        console.log("get gene expression for our gene -- " + this.props.component.id())
+        var me = this.props.component.id();
         
-        console.log(nextState.population)        
-        console.log(this.props)        
-        console.log(nextState.population.byId[this.props.component.props.id]);
+        console.log(nextState)        
+        console.log(nextState.poolById[me])        
+//        console.log(this.props)        
+//        console.log(nextState.population.byId[this.props.component.props.id]);
         
-        return nextState.population.byId[this.props.component.props.id];
+//        return nextState.population.byId[this.props.component.props.id];
+        return nextState.poolById[me]
     }
     
     return component;

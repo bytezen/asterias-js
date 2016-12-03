@@ -34,6 +34,10 @@ var geneticAlgorithmAPI = function(fit,mutationRate){
                             return _.fill(new Array(count),val)
                         })
         
+//        console.log('GA.population param:')
+//        console.log(arr)
+//        console.log('GA.population pool:')
+//        console.log(pool)
         return _.flatten(pool);
     }
     
@@ -41,15 +45,24 @@ var geneticAlgorithmAPI = function(fit,mutationRate){
     * return array of two unique values from arr
     */
     var parents = function(arr) {
+        
         var mom = _.sample(arr);
-        var dad = _.sample(_.nth(_.partition(arr,{name: mom.name}),
-                                1)
-                          )
+//        var dad = _.sample(_.nth(_.partition(arr,{name: mom.name}),
+//                                1)
+        var dad = _.sample(_.filter(arr,function(o){ return o.name != mom.name}))
+                          
         return [mom,dad];
     }
     
     
-    function computeOffspringGenes(a,b,t) {
+    /*
+    * Given array a and b return a new array that
+    * takes the first t% from the shorter array and 1-t%
+    * from the longer array. If both arrays are the same length
+    * then the first array will contribute its first t% of the elements
+    * and the second array will contribute the remainder
+    */
+    function computeOffspringLevels(a,b,t) {
         var parents = _.sortBy([a,b], 'length')
         var len = parents[0].length,            
             left = parents[0],
@@ -57,7 +70,7 @@ var geneticAlgorithmAPI = function(fit,mutationRate){
             right = _.dropRight(parents[1], parents[1].length - len)
         
         var takeNumber = Math.floor(t * len);
-        
+                
         var kidgenes = _.concat(_.take(left,takeNumber),
                                 _.drop(right,takeNumber));      
             
@@ -73,25 +86,83 @@ var geneticAlgorithmAPI = function(fit,mutationRate){
     * @param {Array} b second array
     * @param {Number} t number between 0 and 1, 0 = beginning of array 1 is end
     */
-    var progeny = function(parent1, parent2, split) {
-        var genes = computeOffspringGenes(parent1,parent2,split),
-            kidExpressionLevel = _.assign.apply(
-                {},
-                asteriasAPI.chromosomeLevels(genes))
+    var progeny = function(levelsArr1, levelsArr2, split) {
+        
+//        console.log(levelsArr1)
+        var genes = computeOffspringLevels(levelsArr1,levelsArr2,split)
+        
+//        console.log(levelsArr1)    
+//        console.log('--genes')
+//        console.log(genes)
+//        console.log(genes === levelsArr1)
+        var kidExpressionLevel = _.reduce(genes,
+                                          function(acc,g)                 {
+                                            acc[_.keys(g)[0]] = _.values(g)[0];
+                                            return acc;
+                                        }, {})
+//        var kidExpressionLevel = _.assign.apply(
+//                {},
+//                genes)
+//        console.log(kidExpressionLevel)
+//        console.log(levelsArr1)     
         
         return kidExpressionLevel;
     }
     
-    if(!debug) {
-        return {
-            run: runSim
-        }
-    } else {
+    
+    function runSimulation(organisms,nextPopulationSize,model,chromosomeSplit) {
+//        var GA = geneticAlgorithmAPI(model,0,true); 
+        var nextPool = {},
+            nextParentPool = {},
+            mates,
+            progenyName
+        
+        //1. generate mating pool
+        //fitness return the counts of an organism
+        var matingpool = population(organisms,model)
+//        console.log(matingpool)
+        _.times(nextPopulationSize,
+                function() {
+                    mates = parents(matingpool)
+                    split = chromosomeSplit || Math.random()
+                    
+//                    console.log(split,mates[0].levels,mates[1].levels)
+                    
+                    kidgenes = progeny(mates[0].levels,mates[1].levels, split);
+            
+//                    console.log(kidgenes)    
+                
+                    progenyName = 'ast_' + Math.random().toFixed(5)
+                    
+                    nextPool[progenyName] = 
+                        asteriasAPI.newAsterias(progenyName, kidgenes)
+                    
+                    nextParentPool[progenyName] = {mom: mates[0], dad:mates[1]}
+                })
+
+        return {nextPool: nextPool, nextParentPool:nextParentPool};
+        // for the number of progeny needed:
+        //          GA.parents
+        //          GA.progeny
+        //          createAsterias from progeny
+        //          poolId
+        //          add new population
+        
+            
+    }    
+    
+    
+//    if(!debug) {
+//        return {
+//            run: runSim
+//        }
+//    } else {
         return {
 //            run: runSim,
             population: population,
             parents: parents,
-            progeny: progeny
+            progeny: progeny,
+            runSimulation: runSimulation
         }
-    }
+//    }
 }

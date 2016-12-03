@@ -10,14 +10,11 @@
     <script src="node_modules/lodash/lodash.min.js"></script>
     <script src="lib/redux.min.js"></script>
 
-    <!-- store -->
-   
     <!-- assertions -->    
     <script src="lib/expect.min.js"></script>
     
     <!-- my utils -->
     <script src="./src/scripts/modules/util.js"></script>
-    <script src="./src/scripts/store/storeObserver.js"></script>
     
     <!-- asterias modules -->
     <script src="./src/scripts/modules/gene.js"></script>
@@ -65,8 +62,8 @@
 //                                          coil: .8,
 //                                          color: 0})
         var astcomp = asteriasComponent({id:'test1'},
-                                          {size: 200 + Math.random()*0,
-                                          point: 5,
+                                          {size: 50 + Math.random()*50,
+                                          point: 15,
                                           pointiness: .5,
                                           ring: 9,
                                           shadow: 50,
@@ -76,13 +73,28 @@
                                           coil: .8,
                                           color: 0})
 
+//        var astProps = 
         
-        var comp = asteriasContainer(store,astcomp)
+        var randomSizeAstFactory = (function(){
+            var defaults = {point: 15, pointiness: .5, ring: 9, shadow: 50,
+          brightness: 100, nucleus: .25, twisty: 15, coil: .8,
+          color: 0};
+            
+           return function() {
+               var size = Math.random()*90 + 10;
+               return asteriasComponent({id:'' + Math.random()},
+                                        Object.assign(defaults,{size:size})
+                                       )
+           } 
+        }());
+        
+//        var comp = asteriasContainer(null,astcomp)
+        var comp = asteriasContainer(null,astcomp)
         
         
-        var grid = asteriasGrid({children: _.times(1, asteriasComponent),
-                                 rows: 1,
-                                 cols: 1,
+        var grid = asteriasGrid({children: _.times(8, randomSizeAstFactory),
+                                 rows: 3,
+                                 cols: 3,
                                  width: 600,
                                  height: 500,
                                  center: true
@@ -93,18 +105,16 @@
             canvas = createCanvas(600,500);
             canvas.parent("sketch")
             background(200);
-//            grid.render();
-            translate(300,250);
-            comp.render();
+            grid.render();
+//            translate(300,250);
+//            comp.render();
         }
         
-        function draw(){
-            background(200)
+//        function draw(){
+//            background(200)
 //            fill('yellow')
 //            rect(100,100,50,50);
-            translate(300,250);
-            comp.render();
-        }
+//        }
     </script>
   </body>
 </html>

@@ -8,11 +8,12 @@
    
     <div id="mocha"></div>
     <script src="node_modules/mocha/mocha.js"></script>
-<!--    <script src="node_modules/expect.js/index.js"></script>-->
     <script src="lib/expect.min.js"></script>
     <script src="node_modules/p5/lib/p5.min.js"></script>
     <script src="node_modules/p5/lib/addons/p5.dom.js"></script>   
     <script src="node_modules/lodash/lodash.min.js"></script>
+    <script src="lib/redux.min.js"></script>    
+    <script src="src/scripts/store/storeObserver.js"></script>
     
     <script>mocha.setup('bdd')</script>
 
@@ -20,9 +21,10 @@
     <script src="src/scripts/modules/gene.js"></script>
     <script src="src/scripts/components/geneExpressionComponent.js"></script>
     <script src="src/scripts/components/baseComponent.js"></script>
+    <script src="src/scripts/components/baseContainer.js"></script>
     
     <!-- load your test files here -->
-    <script src="test/componentTest.js"></script>
+    <script src="test/containerTest.js"></script>
 
     <script>
      mocha.run()     

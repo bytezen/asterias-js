@@ -91,6 +91,7 @@ var bytezenAPI = (function() {
     }
 
     
+    function radians(deg) { return ( 3.14159 * deg / 180 ); }
     
     
     function lerp(a,b,t) {

@@ -1,15 +1,15 @@
 var asteriasComponent = function(props,opt){
     var defaultProps = {id:'asterias'+Math.random()},
-        defaultState = {ring:1,
-                         point:4,
-                         size:100,
-                         nucleus: .40,
-                         pointiness:0.05,
-                         brightness:230,
+        defaultState = {ring:5,
+                         point:5,
+                         size:75,
+                         nucleus: .25,
+                         pointiness:0.45,
+                         brightness:150,
                          twisty:0,
                          coil: 0.0,
                          color:0,
-                         shadow:20            
+                         shadow:50            
                         },
         defaultPrivState = {rotation:0,
                             outerOffset: 0,
@@ -25,7 +25,7 @@ var asteriasComponent = function(props,opt){
     function mapval(val,omin,omax,nmin,nmax) {
 //        return 0.5;
         var t = normalize(val,omin,omax);
-        console.log("mapval t = " + t);
+//        console.log("mapval t = " + t);
         return t;
 //        return nmin*(1-t) + nmax * t;
     }
@@ -50,7 +50,7 @@ var asteriasComponent = function(props,opt){
         
 //        var coilFactor;
         var coilFactor = mapval(_privState.coil,-1.0,1.0,0.0,1.0);
-        console.log("coil factor = " + coilFactor)
+//        console.log("coil factor = " + coilFactor)
         
         //update the ratios needed for rendering
         _privState.rotOffset = radians(360 / _privState.point)
@@ -58,29 +58,30 @@ var asteriasComponent = function(props,opt){
         _privState.innerOffset = _privState.outerOffset+
             (_privState.rotOffset * coilFactor )
         
-        return state;
+        this.state = state;
+        return this.state;
     }    
     
-    
-    function stringRenderer() {
-        console.log(props)
-        _.each(state, function(v,k){console.log(k,v)});
-
-                var verts = [];
-        var theta = TAU / state.point,
-            costheta = cos(theta),
-            sintheta = sin(theta);
-            
-        
-//        ellipse(0,0,state.size,state.size);
-        _.each(_.range(state.point),
-               function(i) {
-                    verts.push([i * costheta * state.size,
-                                i * sintheta * state.size])
-                });
-
-        console.log(verts)
-    }
+//    
+//    function stringRenderer() {
+//        console.log(props)
+//        _.each(state, function(v,k){console.log(k,v)});
+//
+//                var verts = [];
+//        var theta = TAU / state.point,
+//            costheta = cos(theta),
+//            sintheta = sin(theta);
+//            
+//        
+////        ellipse(0,0,state.size,state.size);
+//        _.each(_.range(state.point),
+//               function(i) {
+//                    verts.push([i * costheta * state.size,
+//                                i * sintheta * state.size])
+//                });
+//
+//        console.log(verts)
+//    }
     
     function p5Renderer() {
         var rotOffset = _privState.rotOffset,
@@ -130,7 +131,9 @@ var asteriasComponent = function(props,opt){
     
     var component = {
         props: props,
-        render: render
+        render: render,
+        id: function() { return props.id },
+        state: state
     };
     
     component.setState = setState.bind(component);

@@ -17,9 +17,6 @@ var gridAPI = function makeGrid(config) {
         
         rowitercount = opt.rows - 1;
         colitercount = opt.cols - 1;
-        
-        console.log(rowrange)
-        console.log(colrange)
     }
     
 //    console.log(opt);

@@ -33,9 +33,10 @@
     <script src="./src/scripts/modules/ui/grid.js"></script>
     
     <!-- asterias components -->
-    <script src="./src/scripts/components/asteiasGrid.js"></script>
+    <script src="./src/scripts/components/asteriasGrid.js"></script>
     <script src="./src/scripts/components/asteriasComponent.js"></script>
-    <script src="./src/scripts/components/asteriasContainer.js"></script>
+    <script src="./src/scripts/components/asteriasGridCell.js"></script>
+<!--    <script src="./src/scripts/components/asteriasContainer.js"></script>-->
     
     <style>
         #sketch { position:relative; width: 600px; height: 500px;}
@@ -47,64 +48,50 @@
         <div id="sketch" class="w3-green">
           
         </div>
+        <div id="ui" class="w3-section w3-center">
+            
+        </div>
     </main>
     
     <script src="src/scripts/app/app.js"></script>
     
     <script>
-        var canvas        
-//        var comp = asteriasComponent({id:'test1'},
-//                                          {size: 200,
-//                                          point: 15,
-//                                          pointiness: .5,
-//                                          ring: 9,
-//                                          shadow: 50,
-//                                          brightness: 100,
-//                                          nucleus: .25,
-//                                          twisty: 15,
-//                                          coil: .8,
-//                                          color: 0})
-        var astcomp = asteriasComponent({id:'test1'},
-                                          {size: 200 + Math.random()*0,
-                                          point: 5,
-                                          pointiness: .5,
-                                          ring: 9,
-                                          shadow: 50,
-                                          brightness: 100,
-                                          nucleus: .25,
-                                          twisty: 15,
-                                          coil: .8,
-                                          color: 0})
-
+        var canvas, btnEvolve, _store = {};  
         
-        var comp = asteriasContainer(store,astcomp)
-        
-        
-        var grid = asteriasGrid({children: _.times(1, asteriasComponent),
-                                 rows: 1,
-                                 cols: 1,
-                                 width: 600,
-                                 height: 500,
-                                 center: true
-                                })
+        //TODO: find a way around this nasty hack
+        // needed because the button created in the app cannot 
+        // see the apphandler function. Me thinks that 'this' is
+        // getting hijacked by P5...
+        function handler() {
+            app.evolveHandler()
+            redraw();
+        }
         
         function setup(){
             colorMode(HSB);
             canvas = createCanvas(600,500);
             canvas.parent("sketch")
+            app = asteriasApp();
+            app.start(redraw);
             background(200);
 //            grid.render();
-            translate(300,250);
-            comp.render();
+//            translate(300,250);
+//            astComponents[0].render()
+//            cells[0].render();
+            app.render();
+            noLoop();
+//            comp.render();
         }
-        
+
+//        /*
         function draw(){
             background(200)
 //            fill('yellow')
 //            rect(100,100,50,50);
-            translate(300,250);
-            comp.render();
+//            translate(300,250);
+            app.render();
         }
+//        */
     </script>
   </body>
 </html>

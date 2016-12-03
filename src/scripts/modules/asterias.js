@@ -93,6 +93,15 @@ function lerp(a,b,t) {
             })
         }
         
+//        function _getMyValues(){
+//            var values = chromosomeValues(this.chromosome)
+//            return _.assign.apply({},values)
+//        }
+//        
+//        function _getMyLevels(){
+//            var levels = chromosomeLevels(this.chromosome)
+//            return _.assign.apply({},levels)            
+//        }
         
         function _updateGeneProperties() {
             _.each(_chromosome,
@@ -102,13 +111,19 @@ function lerp(a,b,t) {
                     
             })
             ret.chromosome = chromosome();
+            ret.values =  chromosomeValues(ret.chromosome)
+            ret.levels =  chromosomeLevels(ret.chromosome)
+            ret.genes = _.flatten(_.map(ret.chromosome,_.keys))
         }
                 
 
         var ret = {
                 name: name || "_asterias",
                 expression: expressionLevel,
-                chromosome: []
+                chromosome: [],
+                values: [],
+                levels: [],
+                genes: []
                };
         
         //initialize gene properties
