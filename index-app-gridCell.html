@@ -28,6 +28,7 @@
     
     <!-- asterias ducks -->
     <script src="./src/scripts/ducks/simulation.js"></script>      
+    <script src="./src/scripts/ducks/ui.js"></script>      
     
     <!-- UI modules -->
     <script src="./src/scripts/modules/ui/grid.js"></script>
@@ -42,7 +43,7 @@
         #sketch { position:relative; width: 600px; height: 500px;}
     </style>
   </head>
-  <body class="w3-container">
+  <body class="w3-container" oncontextmenu="event.preventDefault(); contextMenuHandler(event)">
     <main class="w3-section w3-grey" style="position:relative">
        
         <div id="sketch" class="w3-green">
@@ -56,8 +57,9 @@
     <script src="src/scripts/app/app.js"></script>
     
     <script>
+
         var canvas, btnEvolve, _store = {};  
-        
+        var mx,my;
         //TODO: find a way around this nasty hack
         // needed because the button created in the app cannot 
         // see the apphandler function. Me thinks that 'this' is
@@ -67,8 +69,48 @@
             redraw();
         }
         
+        
+        function mouseMoved(evt) {            
+            app.mouseMovedHandler(evt.x,evt.y);
+            redraw();
+        }
+        
+//        function mouseClicked(evt) {
+//            app.mouseClickHandler(_.pick(evt,['x','y','button']));
+//            redraw();
+//        }
+        var mouseHandled = false;
+        
+        function contextMenuHandler(event) {
+            console.log('context menu')
+            mouseHandled = true;
+            _mouseHandler(event);
+        }
+        
+        function mouseReleased(event) {
+            if(!mouseHandled) {                
+                _mouseHandler(event)
+            }
+            mouseHandled = false;
+        }
+        
+        function _mouseHandler(e) {
+            app.mouseClickHandler(_.pick(e,['x','y','button']));
+            app.mouseReleasedHandler(e)
+            redraw();                                      
+        }
+        
+        function upVoteClicked() {
+            
+        }
+        
+        function minusClicked() {
+            
+        }
+        
         function setup(){
             colorMode(HSB);
+            textAlign(CENTER);
             canvas = createCanvas(600,500);
             canvas.parent("sketch")
             app = asteriasApp();
@@ -80,6 +122,7 @@
 //            cells[0].render();
             app.render();
             noLoop();
+            
 //            comp.render();
         }
 
@@ -90,6 +133,14 @@
 //            rect(100,100,50,50);
 //            translate(300,250);
             app.render();
+            
+            
+//            if(mclicked)
+//            {
+//                //console.log('got here please start looping again')
+//                loop(); 
+//                mclicked = false;
+//            }
         }
 //        */
     </script>

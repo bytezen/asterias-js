@@ -6,7 +6,7 @@ var asteriasGridCell = function(props,store) {
 //                        ,storeChange: undefined
 //                        ,storeSelect: undefined
                        },
-        state = {},
+        state = { mouseOver: false, mousePos: [-100,-100], mouseReleased: false },
         shouldUpdate = false,
         //use duck typing to try to id the asteriasComponent
         _asteriasComponent = _.filter(props.children,
@@ -27,14 +27,24 @@ var asteriasGridCell = function(props,store) {
             }
         }
         
+        if(this.state.mouseOver && this.state.mouseClicked) {
+            this.props.onClickHandler(this.props._id, this.state.mouseBtn)    
+        }
+        
+        
+        
         if(shouldUpdate) {
             this.render()
         }
+        
+        
         return this.state
     }
     
     function setProps(param) {
         this.props = Object.assign({},this.props,param)
+            
+//        console.log(param)
         
         if(shouldUpdate) {
             this.render()
@@ -44,31 +54,50 @@ var asteriasGridCell = function(props,store) {
         
     function onStoreChangeSelect(nextState) {
         //only interested in the id that is in our asterias component
-        console.log('onStoreChangeSelect', this.props._id)
-        console.log(this.props)
-        console.log(nextState)
+//        console.log('onStoreChangeSelect', this.props._id)
+//        console.log(this.props)
+//        console.log(nextState)
         return nextState.simulation.poolById[this.props._asteriasId]
     }
     
     function onStoreChangeHandler(currentState) {
-//        console.log('gridCell: ' + this.props._asteriasId + ' changed...')
+        console.log('gridCell: ' + this.props._asteriasId + ' changed...')
         return currentState;
     }
     
     
     function render() {
+//        console.log(this.id)
         _asteriasComponent.render();
-    }
+        textAlign(CENTER);
         
+        
+        if(this.state.mouseOver) {
+            fill(120,80,100)
+            rect(20,0,30,30)
+            text("+",20,0);
+            
+            
+            fill(0,80,100)
+            rect(-20,0,30,30)
+            text("-",-20,0);
+            
+//            if(this.state.mouseClicked) {
+//                text("Whoops",0,0)
+//            }
+        } 
+    }
         
     var component = {
         props: defaultProps,
         state: state,
         shouldUpdate: function(bool){ shouldUpdate = bool},
+        id: _asteriasComponent.props.id
     }
     component.setProps = setProps.bind(component)
     component.setState = setState.bind(component)
     component.render = render.bind(component)
+    
     
 
     //override any default props with what was based in the constructor

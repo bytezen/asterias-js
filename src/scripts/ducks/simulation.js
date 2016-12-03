@@ -2,7 +2,6 @@
 
 
 var simulation = (function(){
-    //export const types = {
 
 //    var GA, population, matingPool;
 //
@@ -21,31 +20,7 @@ var simulation = (function(){
         var organisms = _.values(state.poolById)
         return GA.runSimulation(organisms, 
                                 state.populationSize,
-                                state.fitness)
-        /*
-        var GA = geneticAlgorithmAPI(state.fitness,0,true); //debug is last param
-        var nextPool = {},
-            nextParentPool = {},
-            parents,
-            progenyName
-        //1. generate mating pool
-        //fitness return the counts of an organism
-        var matingpool = GA.population(state.poolById,state.fitness)
-        
-        _.times(state.populationSize,
-                function() {
-                    parents = GA.parents(matingpool)
-                    kidgenes = GA.progeny(parents[0],parents[1], 0.5);
-                    progenyName = parents[0].name+'_'+parents[1].name
-                    nextPool[progenyName] = 
-                        asteriasAPI.newAsterias(progenyName, kidgenes)
-                    nextParentPool[progenyName] = {mom: parents[0], dad:parents[1]}
-                })
-
-        return {nextPool: nextPool, nextParentPool:nextParentPool};
-        */
-        
-            
+                                state.fitness)            
     }
     
     function update(state, newstate) {
@@ -84,6 +59,9 @@ var simulation = (function(){
         return ret;
     }
     
+
+    
+    
     var types = {
             ADD_TO_POPULATION: "SIMULATION/ADD_TO_POPULATION",
             ADD_GROUP_TO_POPULATION: "SIMULATION/ADD_GROUP_TO_POPULATION",
@@ -92,7 +70,8 @@ var simulation = (function(){
             ADD_FITNESS_MODEL:'',
             RESET: "SIMULATION/RESET",
             GENERATE_POPULATION: "SIMULATION/GENERATE_POPULATION",
-            SIM_SIZE: "SIMULATION/SET_POPULATION_SIZE"
+            SIM_SIZE: "SIMULATION/SET_POPULATION_SIZE",
+            ADJ_FITNESS: "SIMULATION/ADJUST_FITNESS",
         },
         initialState = {
             mutationRate: 0,
@@ -101,7 +80,8 @@ var simulation = (function(){
             parentsById: {},
             allIds: [], // only poolIds
             generations: 0,
-            fitness: fitnessAPI.equal
+            fitness: fitnessAPI.equal,
+            fitnessById: {}
         }
     
     return {
@@ -160,6 +140,8 @@ var simulation = (function(){
                         
                         nextState.allIds = addIds(nextState.allIds,_.keys(nextState.poolById))                        
                         
+                        nextState.fitnessById =
+                            _.mapValues(nextState.poolById, function(){return 0;})
 //                        FOR SINGLE ORG                        
 //                        var newOrg = randomAsterias()
 //                        var newPool = addToPopulation(state.poolById,newOrg);
@@ -182,6 +164,24 @@ var simulation = (function(){
                     
                     case types.SIM_SIZE:                        
                         return update(state,{populationSize: action.payload});
+                    
+                    case types.ADJ_FITNESS:
+                        var updatedObj = {},
+                            id = action.payload.id,
+                            amt = action.payload.amt;
+                        
+                        updatedObj[id] = Math.max(0,state.fitnessById[id] + amt)
+                            
+                        var nextFitnessById = { 
+                            fitnessById: update(state.fitnessById,
+                                                updatedObj)}
+                        
+                        return update(state,nextFitnessById)
+                        
+                        
+                    case types.DEC_FITNESS:
+                        return state;
+                        break;
                         
                     default:
                         return state;
@@ -208,7 +208,14 @@ var simulation = (function(){
             simulationSize: function(num) { return {type:types.SIM_SIZE, 
                                                     payload: num}},
             
-            resetSim: function(opt) { return {type:types.RESET, payload:opt}}
+            resetSim: function(opt) { return {type:types.RESET, payload:opt}},
+            
+            adjustFitness: function(amt) { 
+                return {type:types.ADJ_FITNESS, payload:amt}},
+            
+            increaseFitness: function(amt) { return {type:types.INC_FITNESS, payload:amt}},
+            
+            decreaseFitness: function(amt) { return { type:types.DEC_FITNESS, payload:amt }}
         },
         
         utils: {

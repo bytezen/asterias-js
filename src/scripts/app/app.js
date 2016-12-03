@@ -6,51 +6,83 @@ var _debug = {}
 
 var asteriasApp = (function(){
     
-var reducer = Redux.combineReducers({simulation: simulation.reducer}),
+var reducer = Redux.combineReducers({simulation: simulation.reducer,
+                                     ui: ui.reducer}),
 //var store = Redux.createStore(simulation.reducer),
     store = Redux.createStore(reducer),
     getState = function () { 
                     return  store.getState().simulation;
                 },
     dispatch = function(action) {
-                    console.log("{dispatching: " + action.type  +"}");
+                    if(_watch(action)) {
+                        console.log("{dispatching: " + action.type  +"}");
+                    }
                     store.dispatch(action);
                 },
     action = simulation.actions,
-    state = {pool: {}, ids:[]}
+    uiaction = ui.actions,
+    state = {pool: {}, ids:[], hoverId: undefined}
     
-    console.log(store.getState());
+//    console.log(store.getState());
     unsubscribeSim = observeStore(store,storeSelect,onStoreChange),
+    unsubscribeUI = observeStore(store, uiStoreSelect, onUIStoreChange)
     update = appSetup
 
-//FOR DEBUG
+    _debug.store = store;
+    
+function _dispatchWatcher(actionsToWatch) {     
+    return function(action) {
+        return _.some(actionsToWatch,function(a) {return a == action.type})
+    }
+}    
+    
+var _watch = _dispatchWatcher([simulation.types.ADJ_FITNESS])
 
+    
+// >>> Store observers ----  //
+        
+function uiStoreSelect(nextState) {
+    return nextState.ui;
+}
+    
+function onUIStoreChange(currentState) {
+    console.log('{app} onUIStoreChange')
+//    console.log(currentState)
+//    state = _.assign({},state,{mousePos: mousePos})
+    grid.setState({mousePos: currentState.mousePos,
+                   mouseClicked: currentState.mouseClicked,
+                   mouseClickedPos: currentState.mouseClickedPos,
+                   mouseBtn: currentState.mouseBtn}
+                 )
+    render();
+    
+}    
+    
 function storeSelect(nextState) {
-    console.log('{app} storeSelect')
+//    console.log('{app} storeSelect')
 //    console.log('00000')
 //    console.log(nextState)
 //    console.log('11111')
     return nextState.simulation;
 }
+
     
 function onStoreChange(currentState) {
-    console.log('{app} onStoreChange')
-    console.log(currentState)
+//    console.log('{app} onStoreChange')
+//    console.log(currentState)
     state = Object.assign({},state,{pool: currentState.poolById,
                                          ids: currentState.allIds})
     _update();
     render();
 }
 
+// ---- Store observers <<<  //    
+    
 /* 2. Create components */
 // Create a components for every member of the population
 
 function asteriasComponentFactory(asterias){
-    console.log('asterias factory....')
-    console.log(asterias)
     var compact = _.assign.apply({},asterias.values)
-    console.log(compact)
-    console.log('....asterias factory')
     return asteriasComponent({id:asterias.name},compact);//asterias.values)
 }
 
@@ -86,8 +118,12 @@ var cells = _.map(astComponents,
             });
 */
 
-var astComponents, cells, grid, btnEvolve;
+var astComponents, cells, grid, btnEvolve, btnUpVote, btnDownVote;
 
+
+// --- Handler functions --- //
+
+    
 function onEvolveClick() {
     //unsubscribe the cells
     //clear everything out to make way for the new population
@@ -98,7 +134,28 @@ function onEvolveClick() {
     dispatch(action.runSimulation());
 }
 
+function onMouseMove(x,y) {
+    //dispatch mouse position??
+    dispatch(uiaction.mouseMoved(x,y))
+}    
+    
+function onMouseClick(e) {
+    dispatch(uiaction.mouseClicked(e))
+}    
 
+function mouseReleasedHandler(e) {
+    dispatch(uiaction.mouseReleased())
+}
+    
+function onGridCellClick(id,btn) {
+//    console.log("gridCell clicked " + id + " " + btn
+    var amt = (btn == ui.constants.LEFT_MOUSE) ? 1 : -1
+    
+    dispatch(action.adjustFitness({id:id, amt:amt}))
+}    
+    
+// --- Handler functions --- //    
+    
 function _updateAsteriasComponent() {
     astComponents = _.map(state.ids,
                          function(id,i){
@@ -111,7 +168,7 @@ function _updateAsteriasComponent() {
 function _updateCells() {
     cells = _.map(astComponents,
                   function(c) {
-                    return asteriasGridCell({children: [c]},store)
+                    return asteriasGridCell({children: [c], onClickHandler: onGridCellClick },store)
             });
 }
 
@@ -156,7 +213,7 @@ function appSetup() {
                              center: true
                             })  
 */
-    _update();
+    
 //    _updateAsteriasComponent();
 //    _updateCells();
 //    _updateGrid();
@@ -164,6 +221,12 @@ function appSetup() {
     btnEvolve.parent("ui");
 //    btnEvolve.mouseReleased(onEvolveClick);    
     btnEvolve.mouseReleased(handler);    
+    
+    btnUpVote = createButton("+")
+    btnUpVote.mouseReleased(upVoteClicked)
+    btnUpVote.hide();
+    
+    _update();    
 }
 
 
@@ -186,6 +249,9 @@ function appSetup() {
         start: start,
         render: render,
         evolveHandler: onEvolveClick,
+        mouseMovedHandler: onMouseMove,
+        mouseClickHandler: onMouseClick,
+        mouseReleasedHandler: mouseReleasedHandler,
         state: _state
     }
     

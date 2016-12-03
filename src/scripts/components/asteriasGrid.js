@@ -5,7 +5,7 @@ var asteriasGrid = function(config){
                         center: true,
                         style: {fill: "black", stroke: "white"}
                        },
-        defaultState = { component: undefined, children: undefined }
+        defaultState = { component: undefined, children: undefined, mousePos:[-100,-100] }
     
     var props = _.defaults(config, defaultProps),
         state = _.defaults({}, defaultState)    
@@ -18,10 +18,18 @@ var asteriasGrid = function(config){
         return state;
     }
     
+    function inBounds(x,y,l,r,t,b) {
+        return (_.inRange(x,l,r) && _.inRange(y, t, b))        
+    }
+    
+    var factor, width, height, hWidth, hHeight
+    
     function _renderBg() {
-        var factor = .95,
-            width = _grid.cellSize[0] * factor,
-            height = width / _grid.ar;
+//        var factor = .95,
+//            width = _grid.cellSize[0] * factor,
+//            height = width / _grid.ar,
+//            hWidth = 0.5 * width,
+//            hHeight = 0.5 * height;
         
         if(props.center) {
             rectMode(CENTER);    
@@ -32,6 +40,15 @@ var asteriasGrid = function(config){
         _.each(_grid.origins,
                function(p){
                 push();
+//                if(_.inRange(state.mousePos[0], p[0] - hWidth, p[0] + hWidth) &&
+//                   _.inRange(state.mousePos[1], p[1] - hHeight, p[1] + hHeight)) {
+//                    fill(60,100,100);
+//                }
+                if( inBounds(state.mousePos[0] , state.mousePos[1],
+                            p[0] - hWidth, p[0] + hWidth ,
+                            p[1] - hHeight, p[1] + hHeight)) {
+                    fill(60,100,100)
+                }
                 translate(p[0],p[1])
                 rect(0,0,width,height)
                 pop();
@@ -39,6 +56,12 @@ var asteriasGrid = function(config){
     }
     
     function render(){
+        factor = .95, 
+        width = _grid.cellSize[0] * factor,
+        height = width / _grid.ar,
+        hWidth = 0.5 * width,
+        hHeight = 0.5 * height;        
+        
         //at every grid origin draw a child if there is one assigned
         var childCount = state.children.length;
         _renderBg()
@@ -53,6 +76,20 @@ var asteriasGrid = function(config){
                     if(i<childCount) {
                         push();
                         translate(p[0],p[1])
+                            
+                            state.children[i].setState(
+                                {mouseOver: inBounds(state.mousePos[0] ,                            state.mousePos[1],
+                                                     p[0] - hWidth, 
+                                                     p[0] + hWidth,
+                                                     p[1] - hHeight,
+                                                     p[1] + hHeight),
+                                 mousePos: [state.mousePos[0], state.mousePos[1]],
+                                 mouseClicked: state.mouseClicked,
+                                 mouseClickedPos: state.mouseClickedPos,
+                                 mouseBtn: state.mouseBtn
+                                })
+                                                
+                        
                         state.children[i].render();
                         pop();
                     }        
