@@ -6,29 +6,31 @@ var _debug = {}
 
 var asteriasApp = (function(){
     
-
-var store = Redux.createStore(simulation.reducer),
-    getState = store.getState,
+var reducer = Redux.combineReducers({simulation: simulation.reducer}),
+//var store = Redux.createStore(simulation.reducer),
+    store = Redux.createStore(reducer),
+    getState = function () { 
+                    return  store.getState().simulation;
+                },
     dispatch = function(action) {
                     console.log("{dispatching: " + action.type  +"}");
-//                    console.log("\t...action")
-//                    console.log(action);
                     store.dispatch(action);
                 },
     action = simulation.actions,
     state = {pool: {}, ids:[]}
+    
+    console.log(store.getState());
     unsubscribeSim = observeStore(store,storeSelect,onStoreChange),
     update = appSetup
 
 //FOR DEBUG
-window._store = store;
 
 function storeSelect(nextState) {
     console.log('{app} storeSelect')
 //    console.log('00000')
 //    console.log(nextState)
 //    console.log('11111')
-    return nextState;
+    return nextState.simulation;
 }
     
 function onStoreChange(currentState) {
@@ -126,11 +128,7 @@ function _updateGrid() {
 function _update() {
     _updateAsteriasComponent();
     _updateCells();
-    _updateGrid();
-    
-    _debug.astComponents = astComponents;
-    _debug.cells = cells;
-    
+    _updateGrid();    
 }
     
     

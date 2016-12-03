@@ -44,10 +44,10 @@ var asteriasGridCell = function(props,store) {
         
     function onStoreChangeSelect(nextState) {
         //only interested in the id that is in our asterias component
-//        console.log('onStoreChangeSelect', this.props._id)
-//        console.log(this.props)
-//        console.log(nextState)
-        return nextState.poolById[this.props._asteriasId]
+        console.log('onStoreChangeSelect', this.props._id)
+        console.log(this.props)
+        console.log(nextState)
+        return nextState.simulation.poolById[this.props._asteriasId]
     }
     
     function onStoreChangeHandler(currentState) {

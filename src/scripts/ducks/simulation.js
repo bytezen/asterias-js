@@ -15,9 +15,14 @@ var simulation = (function(){
     
         
 //        matingPool = GA.population(population,fitness)
-    
+    var GA = geneticAlgorithmAPI();
     
     function runSimulation(state) {
+        var organisms = _.values(state.poolById)
+        return GA.runSimulation(organisms, 
+                                state.populationSize,
+                                state.fitness)
+        /*
         var GA = geneticAlgorithmAPI(state.fitness,0,true); //debug is last param
         var nextPool = {},
             nextParentPool = {},
@@ -38,12 +43,7 @@ var simulation = (function(){
                 })
 
         return {nextPool: nextPool, nextParentPool:nextParentPool};
-        // for the number of progeny needed:
-        //          GA.parents
-        //          GA.progeny
-        //          createAsterias from progeny
-        //          poolId
-        //          add new population
+        */
         
             
     }
