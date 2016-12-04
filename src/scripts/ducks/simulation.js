@@ -17,8 +17,14 @@ var simulation = (function(){
     var GA = geneticAlgorithmAPI();
     
     function runSimulation(state) {
-        var organisms = _.values(state.poolById)
-        return GA.runSimulation(organisms, 
+        var organisms = _.values(_.mapValues(state.poolById,
+                                            function(v,k){
+                                                 return _.assign({fitness:state.fitnessById[k]},
+                                                                 v)
+//                                                state.fitnessById[k];
+                                            }
+                                    ));        
+        return GA.runSimulation(organisms,
                                 state.populationSize,
                                 state.fitness)            
     }
@@ -67,7 +73,7 @@ var simulation = (function(){
             ADD_GROUP_TO_POPULATION: "SIMULATION/ADD_GROUP_TO_POPULATION",
             SETUP: '',
             RUN: 'SIMULATION/RUN',
-            ADD_FITNESS_MODEL:'',
+            SET_FITNESS_MODEL:'SIMULATION/SET_FITNESS_MODEL',
             RESET: "SIMULATION/RESET",
             GENERATE_POPULATION: "SIMULATION/GENERATE_POPULATION",
             SIM_SIZE: "SIMULATION/SET_POPULATION_SIZE",
@@ -113,7 +119,7 @@ var simulation = (function(){
                         var newPool = {poolById: update({},state.poolById)};
                         newPool.poolById =
                             _.reduce(_.take(action.payload.organisms,
-                                            state.simulationSize),
+                                            state.populationSize),
                                               function(res,asterias){
                                                 var obj = {};
                                                 obj[asterias.name] = asterias
@@ -121,6 +127,13 @@ var simulation = (function(){
                                               },
                                               newPool.poolById)
                         nextState = update(state,newPool)
+
+                        nextState.allIds = addIds(nextState.allIds,_.keys(nextState.poolById))                        
+                        
+                        nextState.fitnessById =
+                            _.mapValues(nextState.poolById, function(){return 0;})
+                        
+                        
                         return nextState;
                         
                     case types.GENERATE_POPULATION:
@@ -155,7 +168,7 @@ var simulation = (function(){
                         nextState = update(state,nextPool)
                         nextState.allIds = _.keys(nextState.poolById);
                         nextState.parentsById = simResults.nextParentPool;
-                        
+                        nextState.fitnessById = _.assign({},initialState.fitnessById)
                         return nextState;
                         
                     case types.RESET:
@@ -179,8 +192,8 @@ var simulation = (function(){
                         return update(state,nextFitnessById)
                         
                         
-                    case types.DEC_FITNESS:
-                        return state;
+                    case types.SET_FITNESS_MODEL:
+                        return update(state,{fitness: action.payload});
                         break;
                         
                     default:
@@ -210,8 +223,12 @@ var simulation = (function(){
             
             resetSim: function(opt) { return {type:types.RESET, payload:opt}},
             
-            adjustFitness: function(amt) { 
-                return {type:types.ADJ_FITNESS, payload:amt}},
+            setFitnessModel: function(model) { 
+                return {type:types.SET_FITNESS_MODEL, payload:model}
+            },
+            
+            adjustFitness: function(payload/*id: id, amt: amt*/) {
+                return {type:types.ADJ_FITNESS, payload:payload}},
             
             increaseFitness: function(amt) { return {type:types.INC_FITNESS, payload:amt}},
             

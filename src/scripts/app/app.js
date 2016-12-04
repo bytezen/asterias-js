@@ -30,13 +30,13 @@ var reducer = Redux.combineReducers({simulation: simulation.reducer,
 
     _debug.store = store;
     
-function _dispatchWatcher(actionsToWatch) {     
-    return function(action) {
-        return _.some(actionsToWatch,function(a) {return a == action.type})
-    }
-}    
+//function _dispatchWatcher(actionsToWatch) {     
+//    return function(action) {
+//        return _.some(actionsToWatch,function(a) {return a == action.type})
+//    }
+//}    
     
-var _watch = _dispatchWatcher([simulation.types.ADJ_FITNESS])
+var _watch = dispatchWatcher([simulation.types.ADJ_FITNESS])
 
     
 // >>> Store observers ----  //

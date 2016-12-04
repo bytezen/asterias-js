@@ -15,7 +15,7 @@ var fitness = fitnessAPI.ordinalModel,
 
 var debug;
 
-describe('simulation',function(){
+describe('genetic algorithm',function(){
     var GA, population, matingPool;
 
     describe('general', function(){
@@ -28,13 +28,12 @@ describe('simulation',function(){
 
         beforeEach(function(){
             GA = geneticAlgorithmAPI(fitness,0,true)
-            matingPool = GA.population(population,fitness)
+//            matingPool = GA.population(population,{},fitness)
         })
 //        /*
-        it('can generate a population', function() {        
+        it('can generate a population', function() {  
             matingPool = GA.population(population,fitness)
-            var matingPoolGroupedById = _.mapValues(_.groupBy(matingPool,'name'), 'length')
-
+            var matingPoolGroupedById = _.mapValues(_.groupBy(matingPool,'name'), 'length')           
 
             expect(_.keys(matingPoolGroupedById).length).toBe(population.length)
 
@@ -143,7 +142,7 @@ describe('simulation',function(){
         });
 
 
-        it('can create progeny from mix of parents', function(){
+        it('can create progeny from random mix of parents', function(){
             var mom = asteriasAPI.newAsterias('mom',randomGenes()),
                 dad = asteriasAPI.newAsterias('dad',randomGenes()),
                 momLevels = mom.levels,
@@ -185,21 +184,168 @@ describe('simulation',function(){
 //*/        
     })
     
-
-    describe('running simulation - custom fitness function', function(){
-        var population = _.map(_.range(4),
-                               function() {
-                                    return simulation.utils.randomAsterias()
-                            })
-        var GA = geneticAlgorithmAPI()
+    describe('popularity fitness function', function(){
         
-        //
-        // Fitness function will be based an object, index and array
-        // containing the object
-        //
-        var fitnessModel = function(o,i,arr) {
-            return 4 * i + 1;
+        var fitnessOpt = {
+            minPopularity:1,
+            popularityFactor:2,
+            pLive: 0.5
         }
+        
+        var fitnessFunc = fitnessAPI.getPopularityModel(fitnessOpt);
+        var GA = geneticAlgorithmAPI()        
+        
+        var store, getState, dispatch, action
+        
+        beforeEach(function(){
+            store = Redux.createStore(simulation.reducer),
+            getState = store.getState,
+            dispatch = store.dispatch,
+            action = simulation.actions
+        })
+        
+        it('can properly set counts for organisms with votes', function(){
+            //dispatch(simulation.actions.generatePopulation())
+            var popularityOptions = {minPopularity:1,
+                                     popularityFactor:2,
+                                     pLive: 0.5}
+            
+            var fitnessModel = fitnessAPI
+                                    .getPopularityModel(popularityOptions)
+
+            var populationSize = 10
+            var population = 
+                _.map(_.range(populationSize),
+                             function(i) {
+                              var org = simulation.utils.randomAsterias()
+                                  org.name = "a_" + i;
+                              return org;
+                        })
+            
+            dispatch(action.simulationSize(populationSize))
+            dispatch(action.addMultipleOrganisms(population))
+            dispatch(action.setFitnessModel(fitnessModel))
+            
+            // organisms with id# less than are 0 fitness
+            // else
+            // fitness = 2
+            
+            _.each(population,
+                  function(v,i){
+                if(i >= Math.floor(population.length * 0.5)) {
+                    dispatch(action.adjustFitness({id:v.name, amt: 2}))
+                }
+            })
+            
+            expect(getState().populationSize).toBe(populationSize)
+            expect(_.filter(getState().fitnessById,
+                           function(v,k) {
+                                return v > 0;
+                    }).length)
+                    .toBe(5)
+            
+            dispatch(action.runSimulation());
+
+            //print out a report of child, mom name fitness, dad name fitness
+            _.each(getState().parentsById,
+                  function(parents,kidId) {
+                     console.log('kid: ' + kidId
+                                 + ' mom: ' + parents.mom.name + ' fitness: ' + parents.mom.fitness
+                                + ' dad: ' + parents.dad.name + ' fitness: ' + parents.dad.fitness)
+            })
+            
+//            // ********* Let's do another round of fitness simulation
+//            _.each(getState().poolById,
+//                  function(v,k) {
+//                    dispatch(action.adjustFitness({id:v.name, amt:}))
+//                })
+            
+            window._state = getState();
+            
+            
+            
+            
+        })
+    /*
+        it('will assign minPopularity to all 0 fitness organisms', function(){ 
+            dispatch(simulation.actions.generatePopulation())
+            var fitnessById = _.get(getState(),'fitnessById')
+            
+            //ALL should live            
+            fitnessOpt.pLive = 1.0
+            var newFitness = fitnessFunc(fitnessById,fitnessOpt)
+            
+            expect(_.every(_.values(newFitness),
+                          function(v){ 
+                            return v == opt.minPopularity}
+                          ));
+
+        })
+        
+        it('will reject all 0 fitness organisms', function(){ 
+            dispatch(simulation.actions.generatePopulation())
+            var fitnessById = _.get(getState(),'fitnessById')
+            
+            //ALL should live            
+            fitnessOpt.pLive = 0.0
+            var newFitness = fitnessFunc(fitnessById,fitnessOpt)
+        
+            expect(_.every(_.values(newFitness), 
+                           function(v){ 
+                                return v == 0}
+                            ));            
+        
+            fitnessOpt.pLive = 0.5
+            var newFitness = fitnessFunc(fitnessById,fitnessOpt)
+        
+            expect(_.some(_.values(newFitness), 
+                           function(v){ 
+                                return v == 0}
+                            ));            
+        
+        })        
+            
+        it('',function(){
+            //All will die next
+             pLive = 0.0; 
+            newFitness = _.assign({},fitnessById)
+            _.each(newFitness,
+                  function(v,k,coll){
+                    if( v > 0 ) {
+                        coll[k] = v + popularityShift
+                    } else if( Math.random() < pLive ) {
+                        coll[k] = minPopularity;
+                    } 
+            })            
+
+
+
+            //Some will live
+            pLive = 0.2; 
+            var newFitness = _.assign({},fitnessById)
+            _.each(newFitness,
+                  function(v,k,coll){
+                    if( v > 0 ) {
+                        coll[k] = v + popularityShift
+                    } else if( Math.random() < pLive ) {
+                        coll[k] = minPopularity;
+                    } 
+            })            
+
+            expect(_.some(_.values(newFitness),
+              function(v){ 
+                return v == minPopularity}
+              ));
+            
+            console.log(newFitness)
+            console.log(_.values(_.filter(newFitness,function(v){ return v == minPopularity})))            
+            
+        })
+        
+
+        it('filter out organisms that should die off',function(){
+            
+        })
         
         it('can return nextPool and parentPool', function(){
 //            console.log(_.map(population,function(o){
@@ -262,6 +408,7 @@ describe('simulation',function(){
                 })
             }) //end _.times            
         })
+    */
     })
 
 

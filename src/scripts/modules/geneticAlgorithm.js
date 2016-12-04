@@ -24,13 +24,15 @@ var geneticAlgorithmAPI = function(fit,mutationRate){
     * @return array
     */
     
-    function population(arr,fit) {
+    function population(organisms,fitModel) {
         //arr of items
-        //fit function will return count of those items needed
-        //make fitNum copies of those items
-        var pool = _.map(arr,
+        //fitModel function will return count of those items needed
+        //make fitModelNum copies of those items                
+        
+        //TODO:?? may need to merge organisms and fitness
+        var pool = _.map(organisms,
                          function(val){
-                            var count = fit.apply(null,Array.from(arguments));     
+                            var count = fitModel.apply(null,Array.from(arguments));     
                             return _.fill(new Array(count),val)
                         })
         
@@ -110,6 +112,7 @@ var geneticAlgorithmAPI = function(fit,mutationRate){
     }
     
     
+    
     function runSimulation(organisms,nextPopulationSize,model,chromosomeSplit) {
 //        var GA = geneticAlgorithmAPI(model,0,true); 
         var nextPool = {},
@@ -120,6 +123,8 @@ var geneticAlgorithmAPI = function(fit,mutationRate){
         //1. generate mating pool
         //fitness return the counts of an organism
         var matingpool = population(organisms,model)
+        
+        
 //        console.log(matingpool)
         _.times(nextPopulationSize,
                 function() {

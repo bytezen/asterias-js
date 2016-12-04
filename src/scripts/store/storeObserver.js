@@ -40,3 +40,9 @@ function observeStore(store, select, onChange) {
   handleChange();
   return unsubscribe;
 }
+
+function dispatchWatcher(actionsToWatch) {     
+    return function(action) {
+        return _.some(actionsToWatch,function(a) {return a == action.type})
+    }
+}    
