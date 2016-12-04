@@ -4,7 +4,7 @@
 
 var _debug = {}
 
-var asteriasApp = (function(){
+var asteriasApp = function(width,height){
     
 var reducer = Redux.combineReducers({simulation: simulation.reducer,
                                      ui: ui.reducer}),
@@ -21,7 +21,7 @@ var reducer = Redux.combineReducers({simulation: simulation.reducer,
                 },
     action = simulation.actions,
     uiaction = ui.actions,
-    state = {pool: {}, ids:[], hoverId: undefined}
+    state = {pool: {}, ids:[], hoverId: undefined, hoverCell:undefined}
     
 //    console.log(store.getState());
     unsubscribeSim = observeStore(store,storeSelect,onStoreChange),
@@ -36,7 +36,7 @@ var reducer = Redux.combineReducers({simulation: simulation.reducer,
 //    }
 //}    
     
-var _watch = dispatchWatcher([simulation.types.ADJ_FITNESS])
+var _watch = dispatchWatcher('*');
 
     
 // >>> Store observers ----  //
@@ -46,7 +46,7 @@ function uiStoreSelect(nextState) {
 }
     
 function onUIStoreChange(currentState) {
-    console.log('{app} onUIStoreChange')
+//    console.log('{app} onUIStoreChange')
 //    console.log(currentState)
 //    state = _.assign({},state,{mousePos: mousePos})
     grid.setState({mousePos: currentState.mousePos,
@@ -118,7 +118,7 @@ var cells = _.map(astComponents,
             });
 */
 
-var astComponents, cells, grid, btnEvolve, btnUpVote, btnDownVote;
+var astComponents, cells, grid, btnEvolve, hoverCell;
 
 
 // --- Handler functions --- //
@@ -134,17 +134,38 @@ function onEvolveClick() {
     dispatch(action.runSimulation());
 }
 
+
 function onMouseMove(x,y) {
-    //dispatch mouse position??
-    dispatch(uiaction.mouseMoved(x,y))
+    //dispatch mouse position?? NO!   
+//    dispatch(uiaction.mouseMoved(x,y))
+    
+    //try to have the gridCells respond directly
+    var prev = state.hoverCell
+    state.hoverCell = grid.hoverCell(x,y);
+    
+    if(state.hoverCell != prev) {
+        console.log(state.hoverCell)
+    }
+    
 }    
     
-function onMouseClick(e) {
-    dispatch(uiaction.mouseClicked(e))
+function onMouseClick(event) {
+//    dispatch(uiaction.mouseClicked(e))
+    if(!_.isNil(state.hoverCell)){
+        var amt = (event.button == 0) ? 1 : -1
+        dispatch(action.adjustFitness({id:state.hoverCell.id, amt:amt}))
+    }
 }    
 
 function mouseReleasedHandler(e) {
-    dispatch(uiaction.mouseReleased())
+//    dispatch(uiaction.mouseReleased())
+}
+    
+function keyPressedHandler(event) {    
+    console.log('show the parent window')
+    
+    // if there is a hoverchild grab its details
+    // and display it in the parent overlay component.
 }
     
 function onGridCellClick(id,btn) {
@@ -174,12 +195,14 @@ function _updateCells() {
 
 function _updateGrid() {
     grid = asteriasGrid({children: cells,
-                             rows: 2,
-                             cols: 3,
-                             width: 600,
-                             height: 500,
+                             rows: 4,
+                             cols: 4,
+                             width: 1000,
+                             height: 1000,
                              center: true
-                            })         
+                            })
+//    state.gridOrigins = grid.origins();
+//    console.log(state,grid.props)
 }
     
 function _update() {
@@ -222,17 +245,16 @@ function appSetup() {
 //    btnEvolve.mouseReleased(onEvolveClick);    
     btnEvolve.mouseReleased(handler);    
     
-    btnUpVote = createButton("+")
-    btnUpVote.mouseReleased(upVoteClicked)
-    btnUpVote.hide();
     
     _update();    
 }
 
 
 //-----
-    function start() {
-        dispatch(action.simulationSize(4))
+    function start(astCount) {
+        astCount = astCount || 16;
+        
+        dispatch(action.simulationSize(16))
         dispatch(action.generatePopulation())    
         
         appSetup();
@@ -255,4 +277,4 @@ function appSetup() {
         state: _state
     }
     
-})
+}

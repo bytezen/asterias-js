@@ -99,6 +99,29 @@ var asteriasGrid = function(config){
         
     }
 
+    function hoverCell(mx,my) {     
+        
+        var childCount = state.children.length;
+        var _cell = undefined;
+        var found = _.find(_grid.origins,
+               function(p,i) {
+                    if(i<childCount) {                        
+                        if(inBounds(mx,my,
+                                 p[0] - hWidth,
+                                 p[0] + hWidth,
+                                 p[1] - hHeight,
+                                 p[1] + hHeight)) {
+                            
+                            _cell = state.children[i];
+                            return true;
+                        }
+                    } else {
+                        return false;
+                    }
+                });
+        return _cell;
+    }
+    
     var component = { props: props,
                       render: render,
                       clear: function(){
@@ -107,7 +130,8 @@ var asteriasGrid = function(config){
                                 props.children = [];
                                 console.log(this.props)
                                 console.log('0000000')
-                            }                     
+                            },
+                      hoverCell: hoverCell
                     };
     
     component.render = render.bind(component);        

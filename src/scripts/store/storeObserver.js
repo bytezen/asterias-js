@@ -43,6 +43,11 @@ function observeStore(store, select, onChange) {
 
 function dispatchWatcher(actionsToWatch) {     
     return function(action) {
-        return _.some(actionsToWatch,function(a) {return a == action.type})
+        if(actionsToWatch == '*') { return true; }
+            
+        return _.some(actionsToWatch,
+                      function(a) {
+                        return a == action.type
+                })
     }
 }    

@@ -266,6 +266,104 @@ describe('genetic algorithm',function(){
             
             
         })
+        
+        it('can have self Mating', function(){
+            var popularityOptions = {minPopularity:1,
+                                     popularityFactor:2,
+                                     pLive: 0.0}
+            
+            var fitnessModel = fitnessAPI
+                                    .getPopularityModel(popularityOptions)
+
+            var populationSize = 10
+            var population = 
+                _.map(_.range(populationSize),
+                             function(i) {
+                              var org = simulation.utils.randomAsterias()
+                                  org.name = "a_" + i;
+                              return org;
+                        })
+            
+            dispatch(action.simulationSize(populationSize))
+            dispatch(action.addMultipleOrganisms(population))
+            dispatch(action.setFitnessModel(fitnessModel))
+            dispatch(action.adjustFitness({id:'a_5', amt: 2}))
+            dispatch(action.setMutationRate(0.0))
+            
+            dispatch(action.runSimulation())
+            
+            //all of the children should have the same gene levels
+            var nextPopulation = getState().poolById
+            var levels = _.head(_.values(nextPopulation)).levels;
+            
+            expect(_.every(nextPopulation, 
+                    function(v) { 
+                        return _.isEqual(v.levels,levels)
+                }))
+                .toBe(true)
+            
+            var parents = getState().parentsById
+            var mom = _.head(_.values(parents)).mom.name
+            var dad = _.head(_.values(parents)).dad.name
+            
+            expect(_.every(parents,
+                        function(v){
+                            return ( v.mom.name == mom && v.dad.name == dad)
+                }))
+            .toBe(true)
+            
+            window._state = getState();            
+        })
+        
+        it('mutate changes gene values', function(){
+            var popularityOptions = {minPopularity:1,
+                                     popularityFactor:2,
+                                     pLive: 0.0}
+            
+            var fitnessModel = fitnessAPI
+                                    .getPopularityModel(popularityOptions)
+
+            var populationSize = 10
+            var population = 
+                _.map(_.range(populationSize),
+                             function(i) {
+                              var org = simulation.utils.randomAsterias()
+                                  org.name = "a_" + i;
+                              return org;
+                        })
+            
+            dispatch(action.simulationSize(populationSize))
+            dispatch(action.addMultipleOrganisms(population))
+            dispatch(action.setFitnessModel(fitnessModel))
+            dispatch(action.adjustFitness({id:'a_5', amt: 2}))
+            dispatch(action.setChromosomeSplit(0.5))
+            dispatch(action.setMutationRate(0.1))
+            
+            dispatch(action.runSimulation())
+            
+            var nextPopulation = getState().poolById
+            var levels = _.head(_.values(nextPopulation)).levels;
+            
+            expect(_.every(nextPopulation, 
+                    function(v) { 
+                        return _.isEqual(v.levels,levels)
+                }))
+                .toNotBe(true,'all organisms have the same gene levels. No mutations')
+            
+            var parents = getState().parentsById
+            var mom = _.head(_.values(parents)).mom.name
+            var dad = _.head(_.values(parents)).dad.name
+            
+            expect(_.every(parents,
+                        function(v){
+                            return ( v.mom.name == mom && v.dad.name == dad)
+                }))
+            .toBe(true)
+            
+            window._state = getState();            
+            
+            
+        })
     /*
         it('will assign minPopularity to all 0 fitness organisms', function(){ 
             dispatch(simulation.actions.generatePopulation())

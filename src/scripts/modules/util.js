@@ -109,10 +109,18 @@ var bytezenAPI = (function() {
         return lerp(nmin,nmax,t);
     }    
     
+    /* take an arry of objects and return 1 object with keys
+    * from each of the objects in the array
+    */
+    function compact(arr) {
+      return _.assign.apply({},arr)  
+    } 
+    
     return {
         lerp: lerp,
         norm: norm,
         map: map,
-        product: product
+        product: product,
+        compact: compact
     }
 }())

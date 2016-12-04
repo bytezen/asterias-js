@@ -6,7 +6,11 @@ var asteriasGridCell = function(props,store) {
 //                        ,storeChange: undefined
 //                        ,storeSelect: undefined
                        },
-        state = { mouseOver: false, mousePos: [-100,-100], mouseReleased: false },
+        state = { mouseOver: false, 
+                 mousePos: [-100,-100], 
+                 mouseReleased: false,
+                 fitness: 0
+                },
         shouldUpdate = false,
         //use duck typing to try to id the asteriasComponent
         _asteriasComponent = _.filter(props.children,
@@ -53,15 +57,12 @@ var asteriasGridCell = function(props,store) {
     }
         
     function onStoreChangeSelect(nextState) {
-        //only interested in the id that is in our asterias component
-//        console.log('onStoreChangeSelect', this.props._id)
-//        console.log(this.props)
-//        console.log(nextState)
-        return nextState.simulation.poolById[this.props._asteriasId]
+        //only interested in the id that is in our asterias component        
+        return nextState.simulation.fitnessById[this.props._id]
     }
     
     function onStoreChangeHandler(currentState) {
-        console.log('gridCell: ' + this.props._asteriasId + ' changed...')
+        this.state.fitness = currentState;
         return currentState;
     }
     
@@ -71,6 +72,7 @@ var asteriasGridCell = function(props,store) {
         _asteriasComponent.render();
         textAlign(CENTER);
         
+        text(this.state.fitness,-50,-50)
         
         if(this.state.mouseOver) {
             fill(120,80,100)

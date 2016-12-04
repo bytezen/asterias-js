@@ -2,18 +2,12 @@
 
 
 var simulation = (function(){
-
-//    var GA, population, matingPool;
-//
-//    before(function(){
-//        population = _.map(_.range(16),
-//                          function(i) {
-//                            return asteriasAPI.newAsterias('a_'+i);
-//                        })        
-//    })
+    var popularityFitnessOptions = 
+        { minPopularity:1,
+          popularityFactor:2,
+          pLive: 0.5
+        }
     
-        
-//        matingPool = GA.population(population,fitness)
     var GA = geneticAlgorithmAPI();
     
     function runSimulation(state) {
@@ -23,10 +17,16 @@ var simulation = (function(){
                                                                  v)
 //                                                state.fitnessById[k];
                                             }
-                                    ));        
+                                    ));
+        //undefined will trigger random chromosomeSplitting
+        var cSplit = state.chromosomeSplit >= 0 ? state.chromosomeSplit : undefined
         return GA.runSimulation(organisms,
                                 state.populationSize,
-                                state.fitness)            
+                                state.fitness,
+                                {selfMating: true,
+                                 chromsomeSplit: cSplit,
+                                 mutationRate: state.mutationRate
+                                })            
     }
     
     function update(state, newstate) {
@@ -78,15 +78,18 @@ var simulation = (function(){
             GENERATE_POPULATION: "SIMULATION/GENERATE_POPULATION",
             SIM_SIZE: "SIMULATION/SET_POPULATION_SIZE",
             ADJ_FITNESS: "SIMULATION/ADJUST_FITNESS",
+            SET_CHROMOSOME_SPLIT: "SIMULATION/SET_CHROMOSOME_SPLIT",
+            SET_MUTATION_RATE: "SIMULATION/SET_MUTATION_RATE"
         },
         initialState = {
-            mutationRate: 0,
-            populationSize: 20,
+            mutationRate: 0.05,
+            chromosomeSplit: -1, //this will trigger random chromosome splitting
+            populationSize: 16,
             poolById: {},
             parentsById: {},
             allIds: [], // only poolIds
             generations: 0,
-            fitness: fitnessAPI.equal,
+            fitness: fitnessAPI.getPopularityModel(popularityFitnessOptions),
             fitnessById: {}
         }
     
@@ -163,12 +166,13 @@ var simulation = (function(){
                         return nextState;
                     
                     case types.RUN:
+                        
                         var simResults = runSimulation(state)
                         var nextPool = {poolById: simResults.nextPool}
                         nextState = update(state,nextPool)
                         nextState.allIds = _.keys(nextState.poolById);
                         nextState.parentsById = simResults.nextParentPool;
-                        nextState.fitnessById = _.assign({},initialState.fitnessById)
+                        nextState.fitnessById = _.mapValues(nextState.poolById, function(){return 0;})
                         return nextState;
                         
                     case types.RESET:
@@ -194,7 +198,12 @@ var simulation = (function(){
                         
                     case types.SET_FITNESS_MODEL:
                         return update(state,{fitness: action.payload});
-                        break;
+                        
+                    case types.SET_CHROMOSOME_SPLIT:
+                        return update(state,{chromsomeSplit: action.payload})
+                        
+                    case types.SET_MUTATION_RATE:
+                        return update(state,{mutationRate: action.payload});
                         
                     default:
                         return state;
@@ -229,6 +238,14 @@ var simulation = (function(){
             
             adjustFitness: function(payload/*id: id, amt: amt*/) {
                 return {type:types.ADJ_FITNESS, payload:payload}},
+            
+            setChromosomeSplit: function(amt) {
+                return {type:types.SET_CHROMOSOME_SPLIT, payload: amt}    
+            },
+            
+            setMutationRate: function(amt) {
+                return {type:types.SET_MUTATION_RATE, payload: amt}    
+            },
             
             increaseFitness: function(amt) { return {type:types.INC_FITNESS, payload:amt}},
             

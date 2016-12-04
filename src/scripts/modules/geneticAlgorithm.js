@@ -10,7 +10,8 @@
 */
 
 
-var geneticAlgorithmAPI = function(fit,mutationRate){    
+var geneticAlgorithmAPI = function(fit,mutationRate){ 
+    var compact = bytezenAPI.compact
     debug = false;
     
     if(arguments.length == 3 && arguments[2] === true) {
@@ -46,12 +47,17 @@ var geneticAlgorithmAPI = function(fit,mutationRate){
     /**
     * return array of two unique values from arr
     */
-    var parents = function(arr) {
+    var parents = function(arr,selfMating) {
+        selfMating = !_.isNil(selfMating) ? selfMating : false;
         
-        var mom = _.sample(arr);
-//        var dad = _.sample(_.nth(_.partition(arr,{name: mom.name}),
-//                                1)
-        var dad = _.sample(_.filter(arr,function(o){ return o.name != mom.name}))
+        var mom = _.sample(arr),
+            dad;
+
+        if(selfMating) {
+            dad = _.sample(arr)
+        } else {
+            dad = _.sample(_.filter(arr,function(o){ return o.name != mom.name}))
+        }
                           
         return [mom,dad];
     }
@@ -111,10 +117,36 @@ var geneticAlgorithmAPI = function(fit,mutationRate){
         return kidExpressionLevel;
     }
     
+    var mutate = function(levelsObj, mutationRate) {
+        var ret, debug = []
+        ret = _.mapValues(levelsObj,
+                   function(v,k){
+                     if(Math.random() < mutationRate) {
+                         debug.push(k)
+                         return Math.random()
+                     } else {
+                         return v;
+                     }   
+                 })
+        return ret;   
+    }
     
-    
-    function runSimulation(organisms,nextPopulationSize,model,chromosomeSplit) {
+    /*
+    *
+    * options( chromosomeSplit: default = random,
+    *          selfMating: default = false   )
+    */
+    function runSimulation(organisms,nextPopulationSize,model,opt) {
 //        var GA = geneticAlgorithmAPI(model,0,true); 
+//        opt = _.defaults(opt,{chromosomeSplit: function(){Math.random}})
+        var chromosomeSplit, selfMating, mutationRate;
+        
+        selfMating = !_.isNil(opt.selfMating) ? opt.selfMating : false
+        chromosomeSplit = !_.isNil(opt.chromosomeSplit) 
+                                ? function(){return opt.ChromosomeSplit;} 
+                                : Math.random
+        mutationRate = !_.isNil(opt.mutationRate) ? opt.mutationRate : 0.0
+        
         var nextPool = {},
             nextParentPool = {},
             mates,
@@ -128,13 +160,15 @@ var geneticAlgorithmAPI = function(fit,mutationRate){
 //        console.log(matingpool)
         _.times(nextPopulationSize,
                 function() {
-                    mates = parents(matingpool)
-                    split = chromosomeSplit || Math.random()
+                    mates = parents(matingpool,selfMating)
+                    split = chromosomeSplit();// || Math.random()
                     
 //                    console.log(split,mates[0].levels,mates[1].levels)
                     
                     kidgenes = progeny(mates[0].levels,mates[1].levels, split);
-            
+                    if(mutationRate > 0 ) {
+                        kidgenes = mutate(kidgenes,mutationRate)
+                    }
 //                    console.log(kidgenes)    
                 
                     progenyName = 'ast_' + Math.random().toFixed(5)
@@ -167,6 +201,7 @@ var geneticAlgorithmAPI = function(fit,mutationRate){
             population: population,
             parents: parents,
             progeny: progeny,
+            mutate: mutate,
             runSimulation: runSimulation
         }
 //    }

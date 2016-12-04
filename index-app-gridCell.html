@@ -40,7 +40,7 @@
 <!--    <script src="./src/scripts/components/asteriasContainer.js"></script>-->
     
     <style>
-        #sketch { position:relative; width: 600px; height: 500px;}
+        #sketch { position:relative; width: 1000px; height: 1000px;}
     </style>
   </head>
   <body class="w3-container" oncontextmenu="event.preventDefault(); contextMenuHandler(event)">
@@ -64,7 +64,8 @@
         // needed because the button created in the app cannot 
         // see the apphandler function. Me thinks that 'this' is
         // getting hijacked by P5...
-        function handler() {
+        function handler(evt) {
+            evt.stopPropagation();
             app.evolveHandler()
             redraw();
         }
@@ -72,7 +73,7 @@
         
         function mouseMoved(evt) {            
             app.mouseMovedHandler(evt.x,evt.y);
-            redraw();
+//            redraw();
         }
         
 //        function mouseClicked(evt) {
@@ -99,22 +100,22 @@
             app.mouseReleasedHandler(e)
             redraw();                                      
         }
-        
-        function upVoteClicked() {
-            
-        }
-        
-        function minusClicked() {
-            
+
+        function keyPressed(event) {
+            if(key==='p' || key==='P') {
+                app.keyPressedHandler(event)    
+                redraw();
+            }
+            return false;
         }
         
         function setup(){
             colorMode(HSB);
             textAlign(CENTER);
-            canvas = createCanvas(600,500);
+            canvas = createCanvas(1000,1000);
             canvas.parent("sketch")
-            app = asteriasApp();
-            app.start(redraw);
+            app = asteriasApp(1000,1000);
+            app.start(16);
             background(200);
 //            grid.render();
 //            translate(300,250);
