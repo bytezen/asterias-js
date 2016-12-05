@@ -1,7 +1,8 @@
 //TODO: Refactor to use stamps
 
 var asteriasGridCell = function(props,store) {
-    var defaultProps = {children:[] 
+    var defaultProps = {children:[],
+                        cellSize: [250,250]
 //                        ,store: undefined
 //                        ,storeChange: undefined
 //                        ,storeSelect: undefined
@@ -66,28 +67,27 @@ var asteriasGridCell = function(props,store) {
         return currentState;
     }
     
+    var maxFit = 10
     
     function render() {
 //        console.log(this.id)
         _asteriasComponent.render();
         textAlign(CENTER);
         
-        text(this.state.fitness,-50,-50)
+        var fitbar = bytezenAPI.map(Math.min(maxFit,this.state.fitness),
+                                    0,maxFit,
+                                    0,this.props.cellSize[0]*.95)
+        push();
+        rectMode(CORNER)
+        colorMode(RGB)
+        noStroke();
+        translate(-this.props.cellSize[0]*0.48,-this.props.cellSize[1]*0.48)
+        fill(255,255,0,100);
+        rect(0,0,fitbar,25)
+        pop();
+//        text(this.state.fitness,-this.props.cellSize[0] * 0.45,-50)
         
-        if(this.state.mouseOver) {
-            fill(120,80,100)
-            rect(20,0,30,30)
-            text("+",20,0);
-            
-            
-            fill(0,80,100)
-            rect(-20,0,30,30)
-            text("-",-20,0);
-            
-//            if(this.state.mouseClicked) {
-//                text("Whoops",0,0)
-//            }
-        } 
+        
     }
         
     var component = {

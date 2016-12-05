@@ -100,7 +100,8 @@ var simulation = (function(){
             SIM_SIZE: "SIMULATION/SET_POPULATION_SIZE",
             ADJ_FITNESS: "SIMULATION/ADJUST_FITNESS",
             SET_CHROMOSOME_SPLIT: "SIMULATION/SET_CHROMOSOME_SPLIT",
-            SET_MUTATION_RATE: "SIMULATION/SET_MUTATION_RATE"
+            SET_MUTATION_RATE: "SIMULATION/SET_MUTATION_RATE",
+            CHANGE_EXPRESSION_LEVEL: "SIMULATION/CHANGE_EXPRESSION_LEVEL"
         },
         initialState = {
             mutationRate: 0.05,
@@ -232,6 +233,21 @@ var simulation = (function(){
                     case types.SET_MUTATION_RATE:
                         return update(state,{mutationRate: action.payload});
                         
+                    case types.CHANGE_EXPRESSION_LEVEL:
+                        var organism = state.poolById[action.payload.id]
+                        if( !_.isNil(organism)) {
+                            var nextOrganism = {};
+                            nextOrganism[action.payload.id] = _.assign({},organism);   nextOrganism[action.payload.id].expression(action.payload.genes)
+                            
+                            var nextPool = {poolById: update(state.poolById,
+                                                             nextOrganism)}
+                            var nextState = update(state,nextPool)
+                            
+                            return nextState;
+                        }
+                        
+                        return state;
+                        
                     default:
                         return state;
             }
@@ -272,6 +288,10 @@ var simulation = (function(){
             
             setMutationRate: function(amt) {
                 return {type:types.SET_MUTATION_RATE, payload: amt}    
+            },
+            
+            changeExpressionLevel: function(payload /* id, genes:[{gene,levels}] */){
+                return {type: types.CHANGE_EXPRESSION_LEVEL, payload:payload}    
             },
             
             increaseFitness: function(amt) { return {type:types.INC_FITNESS, payload:amt}},

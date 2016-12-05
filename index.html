@@ -28,83 +28,125 @@
     
     <!-- asterias ducks -->
     <script src="./src/scripts/ducks/simulation.js"></script>      
+    <script src="./src/scripts/ducks/ui.js"></script>    
+    <script src="./src/scripts/ducks/applicationState.js"></script>  
     
     <!-- UI modules -->
     <script src="./src/scripts/modules/ui/grid.js"></script>
     
     <!-- asterias components -->
-    <script src="./src/scripts/components/asteiasGrid.js"></script>
+    <script src="./src/scripts/components/asteriasGrid.js"></script>
     <script src="./src/scripts/components/asteriasComponent.js"></script>
-    <script src="./src/scripts/components/asteriasContainer.js"></script>
+    <script src="./src/scripts/components/asteriasGridCell.js"></script>
+    <script src="./src/scripts/components/parentPanel.js"></script>
+<!--    <script src="./src/scripts/components/asteriasContainer.js"></script>-->
     
     <style>
-        #sketch { position:relative; width: 600px; height: 500px;}
+        #sketch { position:relative; width: 1000px; height: 1000px;}
     </style>
   </head>
-  <body class="w3-container">
-    <main class="w3-section w3-grey" style="position:relative">
+  <body class="w3-container w3-center" oncontextmenu="event.preventDefault(); contextMenuHandler(event)" style="position:relative">
+    <main class="w3-section" style="position:relative">
        
-        <div id="sketch" class="w3-green">
+        <div id="sketch" class="w3-green w3-center" style="position: relative">
           
+        </div>
+        <div id="ui" class="w3-section">
+            
         </div>
     </main>
     
     <script src="src/scripts/app/app.js"></script>
     
     <script>
-        var canvas        
-//        var comp = asteriasComponent({id:'test1'},
-//                                          {size: 200,
-//                                          point: 15,
-//                                          pointiness: .5,
-//                                          ring: 9,
-//                                          shadow: 50,
-//                                          brightness: 100,
-//                                          nucleus: .25,
-//                                          twisty: 15,
-//                                          coil: .8,
-//                                          color: 0})
-        var astcomp = asteriasComponent({id:'test1'},
-                                          {size: 200 + Math.random()*0,
-                                          point: 5,
-                                          pointiness: .5,
-                                          ring: 9,
-                                          shadow: 50,
-                                          brightness: 100,
-                                          nucleus: .25,
-                                          twisty: 15,
-                                          coil: .8,
-                                          color: 0})
 
+        var canvas, btnEvolve, _store = {};  
+        var mx,my;
+        //TODO: find a way around this nasty hack
+        // needed because the button created in the app cannot 
+        // see the apphandler function. Me thinks that 'this' is
+        // getting hijacked by P5...
+        function handler(evt) {
+            evt.stopPropagation();
+            app.evolveHandler()
+            redraw();
+        }
         
-        var comp = asteriasContainer(store,astcomp)
         
+        function mouseMoved(evt) {            
+            app.mouseMovedHandler(mouseX,mouseY);
+//            console.log(evt,evt.x,evt.y, mouseX, mouseY) 
+//            redraw();
+        }
         
-        var grid = asteriasGrid({children: _.times(1, asteriasComponent),
-                                 rows: 1,
-                                 cols: 1,
-                                 width: 600,
-                                 height: 500,
-                                 center: true
-                                })
+//        function mouseClicked(evt) {
+//            app.mouseClickHandler(_.pick(evt,['x','y','button']));
+//            redraw();
+//        }
+        var mouseHandled = false;
+        
+        function contextMenuHandler(event) {
+            console.log('context menu')
+            mouseHandled = true;
+            _mouseHandler(event);
+        }
+        
+        function mouseReleased(event) {
+            if(!mouseHandled) {                
+                _mouseHandler(event)
+            }
+            mouseHandled = false;
+        }
+        
+        function _mouseHandler(e) {
+            app.mouseClickHandler(_.pick(e,['x','y','button']));
+            app.mouseReleasedHandler(e)
+            redraw();                                      
+        }
+
+        function keyPressed(event) {
+            if(key==='p' || key==='P') {
+                app.keyPressedHandler(event)    
+                redraw();
+            }
+            return false;
+        }
         
         function setup(){
             colorMode(HSB);
-            canvas = createCanvas(600,500);
+            textAlign(CENTER);
+            canvas = createCanvas(1000,1000);
             canvas.parent("sketch")
+            app = asteriasApp(1000,1000);
+            app.start(16);
             background(200);
 //            grid.render();
-            translate(300,250);
-            comp.render();
+//            translate(300,250);
+//            astComponents[0].render()
+//            cells[0].render();
+            app.render();
+            noLoop();
+            
+//            comp.render();
         }
-        
+
+//        /*
         function draw(){
             background(200)
 //            fill('yellow')
 //            rect(100,100,50,50);
-            translate(300,250);
-            comp.render();
+//            translate(300,250);
+            app.render();
+            
+            
+//            if(mclicked)
+//            {
+//                //console.log('got here please start looping again')
+//                loop(); 
+//                mclicked = false;
+//            }
         }
+//        */
     </script>
   </body>
 </html>

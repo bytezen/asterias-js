@@ -138,5 +138,14 @@ var asteriasGrid = function(config){
     component.setState = setState.bind(component);
     
     component.setState({children: props.children})
+    
+    //HACKY...will do better
+    //Inject dimension information into children
+    _.each(props.children,function(c) {
+        if(_.has(c,'setProps')) {
+            c.setProps({cellSize: _grid.cellSize})
+        }
+    })
+    
     return component;
 }

@@ -82,10 +82,15 @@ function storeSelect(nextState) {
 
     
 function onStoreChange(currentState) {
-//    console.log('{app} onStoreChange')
+    console.log('{app} onStoreChange')
 //    console.log(currentState)
     state = Object.assign({},state,{pool: currentState.poolById,
                                          ids: currentState.allIds})
+//    if(!_.isNil(grid) && !_.isNil(cells) ) {
+//        _.each(cells,function(c){c.unsubscribe()})
+//        cells = [];
+//        grid.clear()        
+//    }
     _update();
     render();
 }
@@ -103,14 +108,12 @@ function onAppStateChange(currentState) {
             org = getSimState().poolById[selectedId],
             parents = getSimState().parentsById[selectedId],
             mom = !_.isNil(parents) ? parents.mom : undefined,
-            dad = !_.isNil(parents) ? parents.dad : undefined
-        
-        
-        
-        console.log("showing parent window for")
-        console.log(org);
-        console.log('current parents model = ' )
-        console.log(getSimState().parentsById)
+            dad = !_.isNil(parents) ? parents.dad : undefined        
+//        
+//        console.log("showing parent window for")
+//        console.log(org);
+//        console.log('current parents model = ' )
+//        console.log(getSimState().parentsById)
         
         pnlParent.setState({organism: org, mom: mom, dad: dad})    
     }
@@ -123,7 +126,7 @@ function onAppStateChange(currentState) {
 
 function asteriasComponentFactory(asterias){
     var compact = _.assign.apply({},asterias.getValues())    
-    
+    console.log('creating new asterias component...')
     return asteriasComponent({id:asterias.name},compact);//asterias.values)
 }
 

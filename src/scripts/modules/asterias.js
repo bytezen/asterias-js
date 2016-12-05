@@ -18,15 +18,15 @@ function lerp(a,b,t) {
         coil: 0.5
     }
     
-    var genomeConfig = { "ring" :[3,21],
+    var genomeConfig = { "ring" :[3,20],
             "point": [3,20],
-            "size": [50,200],
-            "pointiness": [0.01,1.0],
+            "size": [50,150],
+            "pointiness": [0.21,1.0],
             "brightness": [100,250],
-            "twisty": [0,100],
+            "twisty": [0,40],//[0,100],
             "color": [0,360],
-            "shadow": [30,80],
-            "nucleus": [.10,.50],
+            "shadow": [30,50],
+            "nucleus": [.20,.75],
             "coil": [-1.0,1.0],
         }    
     
@@ -77,16 +77,39 @@ function lerp(a,b,t) {
             })
         }
         
+        /*
+        * Hack for now...can pass in name, level 
+        * or pass in array of name, level objects
+        */
         function expressionLevel(name,level) {
-            if(!_.has(geneLevels,name))
-                throw new Error("no gene by that name: " + name)
+
+//            if(!_.has(geneLevels,name)) {
+//                console.log('expression level for: ')
+//                console.log(name)
+//                throw new Error("no gene by that name: "))
+//            }
+            
+            if(arguments.length == 2) {
+                if(!_.isNil(level)) {
+                    geneLevels[name] = level;  
+                    _updateGeneProperties();
+                }                 
+            } else if(_.isArray(name) ) {
                 
-            if(!_.isNil(level)) {
-                geneLevels[name] = level;  
-                console.log('expression level vvvv')
+                console.log('expression levels before:')
+                console.log(geneLevels)
+                
+                _.each(name, function(o){
+                    geneLevels[_.head(_.keys(o))] = _.head(_.values(o));
+                })
+                
                 _updateGeneProperties();
-            } 
-            console.log('expression level ^^^^')
+                
+                console.log('expression levels after:')
+                console.log(geneLevels)
+                                
+            }
+                
         }
         
 
@@ -113,8 +136,21 @@ function lerp(a,b,t) {
             
             _.each(_chromosome,
                   function(geneName){
-                    ret[geneName].level = geneLevels[geneName];
-                    ret[geneName].value = getExpressionValue(geneName, geneLevels[geneName])
+                    //NASTY first implementation
+                    var lvl = geneLevels[geneName];
+                    var val = getExpressionValue(geneName, lvl);
+                
+                    switch(geneName) {
+                        case 'ring':
+                        case 'point':
+                        case 'twisty':
+                        case 'shadow':
+                        case 'brightness':
+                            val = Math.round(val);
+                    }
+                
+                    ret[geneName].level = lvl;
+                    ret[geneName].value = val;
             })
             
             ret.chromosome = chromosome();
