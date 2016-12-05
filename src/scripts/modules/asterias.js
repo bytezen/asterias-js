@@ -1,4 +1,5 @@
 var asteriasAPI = (function(){
+    
 function lerp(a,b,t) {
     return (1-t)*a + b*t;
 }
@@ -77,10 +78,15 @@ function lerp(a,b,t) {
         }
         
         function expressionLevel(name,level) {
+            if(!_.has(geneLevels,name))
+                throw new Error("no gene by that name: " + name)
+                
             if(!_.isNil(level)) {
                 geneLevels[name] = level;  
+                console.log('expression level vvvv')
                 _updateGeneProperties();
             } 
+            console.log('expression level ^^^^')
         }
         
 
@@ -104,25 +110,44 @@ function lerp(a,b,t) {
 //        }
         
         function _updateGeneProperties() {
+            
             _.each(_chromosome,
                   function(geneName){
                     ret[geneName].level = geneLevels[geneName];
                     ret[geneName].value = getExpressionValue(geneName, geneLevels[geneName])
-                    
             })
+            
             ret.chromosome = chromosome();
-            ret.values =  chromosomeValues(ret.chromosome)
-            ret.levels =  chromosomeLevels(ret.chromosome)
+//            ret.values =  chromosomeValues(ret.chromosome)
+//            ret.levels =  chromosomeLevels(ret.chromosome)
             ret.genes = _.flatten(_.map(ret.chromosome,_.keys))
+            
+//            if(!_.isEqual(['ring'],_.keys(_.head(ret.levels))) || 
+//               !_.isEqual(['ring'],_.keys(_.head(ret.values)))) {
+//                
+//                console.log(ret.name + '{asterias.updateGeneProperties:levels(head), values(head) } vvvv' )
+//                console.log(_.head(ret.levels))
+//                console.log(_.head(ret.values))
+//                console.log('^^^^\n')
+//            } 
         }
                 
+        function dataFromChromosome(property) {
+            return _.map(this.chromosome, 
+                  function(o) { 
+                    var obj = {}; 
+                    var gene = _.head(_.keys(o)); 
+                    obj[gene] = o[gene][property]; 
+                    return obj; 
+            })             
+        }
 
         var ret = {
                 name: name || "_asterias",
                 expression: expressionLevel,
                 chromosome: [],
-                values: [],
-                levels: [],
+//                values: [],
+//                levels: [],
                 genes: []
                };
         
@@ -131,7 +156,18 @@ function lerp(a,b,t) {
               function(geneName){
                 ret[geneName] = {};
         })
+        
+        ret.dataFromChromosome = dataFromChromosome.bind(ret);
+        ret.getLevels = function() { return this.dataFromChromosome('level'); }
+        ret.getValues = function() { return this.dataFromChromosome('value'); }
+        
         _updateGeneProperties()
+        
+//        var _shadowDebug = _.assign({},ret)
+//        console.log('_create asterias vvvv')
+//        console.log(_shadowDebug)
+//        console.log('_create asterias ^^^^')
+        
         
         //create a property for each gene as a shortcut to access the 
         // value and level

@@ -54,14 +54,35 @@ var simulation = (function(){
         return 'ast_'+stem
     }
     
-    function randomAsterias() {        
-        var ret = asteriasAPI.newAsterias(randomId())
+    function randomAsterias() {
+        //better approach...create a random chromosome!!
         
-        _.each(ret.chromosome,
-               function(g){ 
-                    var gene = _.keys(g)[0]
-                    ret.expression(gene,Math.random())
-                }); 
+        var genelevels =  _.map(asteriasAPI.chromosome, 
+                                function(gene) { 
+                                    var obj = {}; 
+                                    obj[gene] = Math.random(); 
+                                    return obj; 
+                                }) 
+        genelevels = bytezenAPI.compact(genelevels)
+        var ret = asteriasAPI.newAsterias(randomId(),genelevels)
+        
+        
+//        console.log('random asterias VVVV')
+//        var shadow = _.assign({},ret)
+//        console.log(shadow)
+//        console.log('random asterias ^^^^')
+
+        //        _.each(ret.chromosome,
+        //               function(g){ 
+        //                    var gene = _.keys(g)[0]
+        //                    ret.expression(gene,Math.random())
+        //                }); 
+
+//        console.log(' 222 random asterias VVVV')
+//        var shadow2 = _.assign({},ret)
+//        console.log(shadow2)
+//        console.log(' 222 random asterias ^^^^')
+                
         return ret;
     }
     
@@ -142,8 +163,9 @@ var simulation = (function(){
                     case types.GENERATE_POPULATION:
                         var randomPop = _.map(_.range(state.populationSize),
                                               randomAsterias)
-//                        console.log(randomPop)
+                      
                         var nextPool = {poolById: update({},state.poolById)};
+                        
                         nextPool.poolById = _.reduce(randomPop,
                                               function(res,asterias){
                                                 var obj = {};
@@ -151,7 +173,8 @@ var simulation = (function(){
                                                 return update(res,obj);
                                               },
                                               nextPool.poolById)
-//                        console.log(nextPool);
+                        
+                        
                         nextState = update(state,nextPool)                        
                         
                         nextState.allIds = addIds(nextState.allIds,_.keys(nextState.poolById))                        
@@ -193,7 +216,11 @@ var simulation = (function(){
                             fitnessById: update(state.fitnessById,
                                                 updatedObj)}
                         
-                        return update(state,nextFitnessById)
+                        var nextState = update(state,nextFitnessById)
+//                        console.log('adjusting fitness vvvv')
+//                        console.log(nextState.poolById[id].getLevels())
+//                        console.log('^^^^')
+                        return nextState
                         
                         
                     case types.SET_FITNESS_MODEL:

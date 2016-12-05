@@ -17,6 +17,33 @@ describe('Asterias', function() {
     });
     
     describe('defaults', function(){
+        it('creates a random asterias', function(){
+            
+            function randomId() {
+                var stem = (Math.random() * Math.random()).toFixed(5)
+                return 'ast_'+stem
+            }
+
+            var ret = asteriasAPI.newAsterias(randomId())
+
+            _.each(ret.chromosome,
+                   function(g){ 
+                        var gene = _.keys(g)[0]
+                        ret.expression(gene,Math.random())
+                    });             
+            
+            var chromosomeGeneOrder = _.flatten(_.map(ret.chromosome,_.keys)),
+                valuesGeneOrder = _.flatten(_.map(ret.values,_.keys)),
+                levelsGeneOrder = _.flatten(_.map(ret.levels,_.keys))
+            
+            expect(ret.genes).toEqual(chromosomeGeneOrder)
+            expect(chromosomeGeneOrder).toEqual(valuesGeneOrder)
+            expect(chromosomeGeneOrder).toEqual(levelsGeneOrder)
+            
+            console.log(ret)
+            
+        })
+        
         it('returns genes in chromosome order ', function(){
             var asterias = asteriasAPI.newAsterias();
             var chromosomeGeneOrder = _.flatten(_.map(asterias.chromosome,_.keys)),

@@ -132,7 +132,12 @@ var asteriasComponent = function(props,opt){
     var component = {
         props: props,
         render: render,
-        id: function() { return props.id },
+        id: function(v) { 
+            if(!_.isNil(v)) {
+                props.id = v;
+            }
+            return props.id 
+        },
         state: state
     };
     

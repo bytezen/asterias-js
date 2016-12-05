@@ -165,7 +165,7 @@ var geneticAlgorithmAPI = function(fit,mutationRate){
                     
 //                    console.log(split,mates[0].levels,mates[1].levels)
                     
-                    kidgenes = progeny(mates[0].levels,mates[1].levels, split);
+                    kidgenes = progeny(mates[0].getLevels(),mates[1].getLevels(), split);
                     if(mutationRate > 0 ) {
                         kidgenes = mutate(kidgenes,mutationRate)
                     }

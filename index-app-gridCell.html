@@ -28,7 +28,8 @@
     
     <!-- asterias ducks -->
     <script src="./src/scripts/ducks/simulation.js"></script>      
-    <script src="./src/scripts/ducks/ui.js"></script>      
+    <script src="./src/scripts/ducks/ui.js"></script>    
+    <script src="./src/scripts/ducks/applicationState.js"></script>  
     
     <!-- UI modules -->
     <script src="./src/scripts/modules/ui/grid.js"></script>
@@ -37,19 +38,20 @@
     <script src="./src/scripts/components/asteriasGrid.js"></script>
     <script src="./src/scripts/components/asteriasComponent.js"></script>
     <script src="./src/scripts/components/asteriasGridCell.js"></script>
+    <script src="./src/scripts/components/parentPanel.js"></script>
 <!--    <script src="./src/scripts/components/asteriasContainer.js"></script>-->
     
     <style>
         #sketch { position:relative; width: 1000px; height: 1000px;}
     </style>
   </head>
-  <body class="w3-container" oncontextmenu="event.preventDefault(); contextMenuHandler(event)">
+  <body class="w3-container w3-center" oncontextmenu="event.preventDefault(); contextMenuHandler(event)" style="position:relative">
     <main class="w3-section w3-grey" style="position:relative">
        
-        <div id="sketch" class="w3-green">
+        <div id="sketch" class="w3-green w3-center" style="position: relative">
           
         </div>
-        <div id="ui" class="w3-section w3-center">
+        <div id="ui" class="w3-section">
             
         </div>
     </main>
@@ -72,7 +74,8 @@
         
         
         function mouseMoved(evt) {            
-            app.mouseMovedHandler(evt.x,evt.y);
+            app.mouseMovedHandler(mouseX,mouseY);
+//            console.log(evt,evt.x,evt.y, mouseX, mouseY) 
 //            redraw();
         }
         
